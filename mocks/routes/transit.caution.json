@@ -1,0 +1,206 @@
+{
+  "searchId": "search_transit_caution_001",
+  "mode": "TRANSIT",
+  "status": "SUCCESS",
+  "generatedAt": "2026-07-15T14:00:00+09:00",
+  "expiresAt": "2026-07-15T14:10:00+09:00",
+  "routes": [
+    {
+      "routeId": "route_transit_caution_001",
+      "rank": 1,
+      "mode": "TRANSIT",
+      "title": "강남역에서 버스 1회",
+      "accessibilityStatus": "CAUTION",
+      "dataConfidence": "UNKNOWN",
+      "summary": {
+        "standardDurationSec": 1620,
+        "personalizedDurationSec": 1980,
+        "departureAt": "2026-07-15T14:00:00+09:00",
+        "arrivalAt": "2026-07-15T14:33:00+09:00",
+        "totalDistanceM": 4900,
+        "walkDistanceM": 600,
+        "transferCount": 0,
+        "fareKrw": 1500
+      },
+      "warnings": [
+        {
+          "code": "LOW_FLOOR_BUS_UNKNOWN",
+          "severity": "WARNING",
+          "message": "탑승 예정 차량의 저상버스 여부를 확인할 수 없습니다.",
+          "legId": "leg_caution_02"
+        },
+        {
+          "code": "PERSONALIZED_TIME_LONGER",
+          "severity": "INFO",
+          "message": "개인 이동속도를 반영하면 일반 안내보다 6분 더 걸립니다."
+        }
+      ],
+      "unavailableReasons": [],
+      "legs": [
+        {
+          "legId": "leg_caution_01",
+          "mode": "WALK",
+          "start": {
+            "providerPlaceId": "kakao_place_gangnam_station_001",
+            "name": "강남역 10번 출구",
+            "coordinate": {
+              "latitude": 37.4979,
+              "longitude": 127.0276
+            }
+          },
+          "end": {
+            "providerPlaceId": "bus_stop_gangnam_001",
+            "name": "강남역 버스정류장",
+            "coordinate": {
+              "latitude": 37.4990,
+              "longitude": 127.0263
+            }
+          },
+          "distanceM": 350,
+          "standardDurationSec": 420,
+          "personalizedDurationSec": 600,
+          "geometry": {
+            "type": "LineString",
+            "coordinates": [
+              [127.0276, 37.4979],
+              [127.0269, 37.4985],
+              [127.0263, 37.4990]
+            ]
+          },
+          "steps": [
+            {
+              "instruction": "강남대로의 평탄한 보행로를 따라 정류장으로 이동하세요.",
+              "distanceM": 350,
+              "streetName": "강남대로",
+              "geometry": {
+                "type": "LineString",
+                "coordinates": [
+                  [127.0276, 37.4979],
+                  [127.0269, 37.4985],
+                  [127.0263, 37.4990]
+                ]
+              }
+            }
+          ],
+          "maxSlopePercent": 3.0,
+          "hasStairs": false,
+          "dataConfidence": "VERIFIED"
+        },
+        {
+          "legId": "leg_caution_02",
+          "mode": "BUS",
+          "start": {
+            "providerPlaceId": "bus_stop_gangnam_001",
+            "name": "강남역 버스정류장",
+            "coordinate": {
+              "latitude": 37.4990,
+              "longitude": 127.0263
+            }
+          },
+          "end": {
+            "providerPlaceId": "bus_stop_hospital_001",
+            "name": "서울성모병원 정류장",
+            "coordinate": {
+              "latitude": 37.5012,
+              "longitude": 127.0050
+            }
+          },
+          "distanceM": 4300,
+          "standardDurationSec": 900,
+          "personalizedDurationSec": 900,
+          "geometry": {
+            "type": "LineString",
+            "coordinates": [
+              [127.0263, 37.4990],
+              [127.0180, 37.5010],
+              [127.0100, 37.5020],
+              [127.0050, 37.5012]
+            ]
+          },
+          "routeId": "bus_route_demo_740",
+          "routeName": "740",
+          "boardingStop": {
+            "providerPlaceId": "bus_stop_gangnam_001",
+            "name": "강남역 버스정류장",
+            "coordinate": {
+              "latitude": 37.4990,
+              "longitude": 127.0263
+            }
+          },
+          "alightingStop": {
+            "providerPlaceId": "bus_stop_hospital_001",
+            "name": "서울성모병원 정류장",
+            "coordinate": {
+              "latitude": 37.5012,
+              "longitude": 127.0050
+            }
+          },
+          "lowFloorStatus": "UNKNOWN",
+          "departureAt": "2026-07-15T14:12:00+09:00",
+          "arrivalAt": "2026-07-15T14:27:00+09:00",
+          "timeSource": "REALTIME",
+          "dataConfidence": "UNKNOWN"
+        },
+        {
+          "legId": "leg_caution_03",
+          "mode": "WALK",
+          "start": {
+            "providerPlaceId": "bus_stop_hospital_001",
+            "name": "서울성모병원 정류장",
+            "coordinate": {
+              "latitude": 37.5012,
+              "longitude": 127.0050
+            }
+          },
+          "end": {
+            "providerPlaceId": "kakao_place_hospital_001",
+            "name": "서울성모병원 정문",
+            "coordinate": {
+              "latitude": 37.5018,
+              "longitude": 127.0042
+            }
+          },
+          "distanceM": 250,
+          "standardDurationSec": 300,
+          "personalizedDurationSec": 480,
+          "geometry": {
+            "type": "LineString",
+            "coordinates": [
+              [127.0050, 37.5012],
+              [127.0046, 37.5015],
+              [127.0042, 37.5018]
+            ]
+          },
+          "steps": [
+            {
+              "instruction": "횡단보도를 건너 병원 정문 경사로로 이동하세요.",
+              "distanceM": 250,
+              "streetName": "반포대로",
+              "geometry": {
+                "type": "LineString",
+                "coordinates": [
+                  [127.0050, 37.5012],
+                  [127.0046, 37.5015],
+                  [127.0042, 37.5018]
+                ]
+              }
+            }
+          ],
+          "maxSlopePercent": 4.5,
+          "hasStairs": false,
+          "dataConfidence": "ESTIMATED"
+        }
+      ]
+    }
+  ],
+  "fallbackModes": [
+    "TAXI"
+  ],
+  "notices": [
+    {
+      "code": "VERIFY_LOW_FLOOR_BEFORE_DEPARTURE",
+      "severity": "WARNING",
+      "message": "출발 전에 저상버스 운행 여부를 다시 확인해 주세요."
+    }
+  ]
+}

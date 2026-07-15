@@ -1,0 +1,1193 @@
+openapi: 3.1.0
+info:
+  title: Tech4Good 교통약자 맞춤 이동 API
+  version: 1.0.0
+  description: |
+    React/Vite 프론트엔드, FastAPI 백엔드와 Python 개인화 경로 엔진이 공유하는 MVP 계약입니다.
+    모든 예시 데이터는 합성 데이터이며 실제 운행정보가 아닙니다.
+servers:
+  - url: http://localhost:8000/api/v1
+    description: Local development
+tags:
+  - name: Auth
+  - name: Users
+  - name: Places
+  - name: Routes
+  - name: Navigation
+paths:
+  /auth/signup:
+    post:
+      tags: [Auth]
+      summary: 이메일 회원가입
+      operationId: signup
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SignupRequest'
+      responses:
+        '201':
+          description: 가입 성공
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '409':
+          $ref: '#/components/responses/ConflictError'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+  /auth/login:
+    post:
+      tags: [Auth]
+      summary: 이메일 로그인
+      operationId: login
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: 로그인 성공
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+  /users/me:
+    get:
+      tags: [Users]
+      summary: 현재 사용자 조회
+      operationId: getCurrentUser
+      responses:
+        '200':
+          description: 현재 사용자
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+    delete:
+      tags: [Users]
+      summary: 회원 탈퇴
+      operationId: deleteCurrentUser
+      responses:
+        '204':
+          description: 계정, 프로필과 속도 집계 삭제 성공
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+  /users/me/profile:
+    get:
+      tags: [Users]
+      summary: 이동 프로필 조회
+      operationId: getCurrentUserProfile
+      responses:
+        '200':
+          description: 현재 이동 프로필
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfile'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+    put:
+      tags: [Users]
+      summary: 이동 프로필 전체 저장
+      operationId: replaceCurrentUserProfile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateProfileRequest'
+      responses:
+        '200':
+          description: 저장된 이동 프로필
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfile'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+  /places/search:
+    get:
+      tags: [Places]
+      summary: 장소 검색
+      operationId: searchPlaces
+      parameters:
+        - name: q
+          in: query
+          required: true
+          schema:
+            type: string
+            minLength: 2
+            maxLength: 100
+        - name: latitude
+          in: query
+          required: false
+          schema:
+            type: number
+            minimum: -90
+            maximum: 90
+        - name: longitude
+          in: query
+          required: false
+          schema:
+            type: number
+            minimum: -180
+            maximum: 180
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: size
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 15
+            default: 10
+      responses:
+        '200':
+          description: 정규화된 장소 검색 결과
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlaceSearchResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '503':
+          $ref: '#/components/responses/UpstreamUnavailableError'
+  /routes/search:
+    post:
+      tags: [Routes]
+      summary: 개인화 경로 검색
+      operationId: searchRoutes
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RouteSearchRequest'
+      responses:
+        '200':
+          description: 경로 검색 결과. 접근 가능한 경로가 없어도 정상 응답입니다.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RouteSearchResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '429':
+          $ref: '#/components/responses/RateLimitedError'
+        '502':
+          $ref: '#/components/responses/UpstreamInvalidResponseError'
+        '503':
+          $ref: '#/components/responses/UpstreamUnavailableError'
+  /routes/{routeId}:
+    get:
+      tags: [Routes]
+      summary: 유효한 경로 상세 조회
+      operationId: getRoute
+      parameters:
+        - $ref: '#/components/parameters/RouteId'
+      responses:
+        '200':
+          description: 경로 상세
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Route'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '410':
+          $ref: '#/components/responses/RouteExpiredError'
+  /navigation/sessions:
+    post:
+      tags: [Navigation]
+      summary: 안내 세션 시작
+      operationId: startNavigation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StartNavigationRequest'
+      responses:
+        '201':
+          description: 시작된 안내 세션
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NavigationSession'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '410':
+          $ref: '#/components/responses/RouteExpiredError'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+  /navigation/sessions/{sessionId}/position:
+    post:
+      tags: [Navigation]
+      summary: 현재 위치 처리 및 재탐색 제안
+      operationId: updateNavigationPosition
+      parameters:
+        - $ref: '#/components/parameters/SessionId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LocationSample'
+      responses:
+        '200':
+          description: 안내 상태 갱신. 원본 좌표는 영구 저장하지 않습니다.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NavigationUpdate'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '409':
+          $ref: '#/components/responses/ConflictError'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+  /navigation/sessions/{sessionId}/reroute:
+    post:
+      tags: [Navigation]
+      summary: 사용자 확인 후 경로 재탐색
+      operationId: rerouteNavigation
+      parameters:
+        - $ref: '#/components/parameters/SessionId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RerouteRequest'
+      responses:
+        '200':
+          description: 새 경로가 반영된 동일 안내 세션
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NavigationSession'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '409':
+          $ref: '#/components/responses/ConflictError'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '429':
+          $ref: '#/components/responses/RateLimitedError'
+        '503':
+          $ref: '#/components/responses/UpstreamUnavailableError'
+  /navigation/sessions/{sessionId}/complete:
+    post:
+      tags: [Navigation]
+      summary: 안내 완료 및 보행속도 학습
+      operationId: completeNavigation
+      parameters:
+        - $ref: '#/components/parameters/SessionId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CompleteNavigationRequest'
+      responses:
+        '200':
+          description: 안내 완료 결과
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NavigationCompletion'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '409':
+          $ref: '#/components/responses/ConflictError'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  parameters:
+    RouteId:
+      name: routeId
+      in: path
+      required: true
+      schema:
+        type: string
+        minLength: 1
+    SessionId:
+      name: sessionId
+      in: path
+      required: true
+      schema:
+        type: string
+        minLength: 1
+  responses:
+    UnauthorizedError:
+      description: 인증 실패
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    NotFoundError:
+      description: 대상을 찾을 수 없음
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    ConflictError:
+      description: 현재 상태와 충돌
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    RouteExpiredError:
+      description: 경로 만료
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    ValidationError:
+      description: 요청 필드 검증 실패
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    RateLimitedError:
+      description: 호출 한도 초과
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    UpstreamInvalidResponseError:
+      description: 외부 API 응답 변환 실패
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    UpstreamUnavailableError:
+      description: 외부 API 장애 또는 타임아웃
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+  schemas:
+    SignupRequest:
+      type: object
+      additionalProperties: false
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          format: email
+          maxLength: 254
+        password:
+          type: string
+          minLength: 8
+          maxLength: 128
+    LoginRequest:
+      type: object
+      additionalProperties: false
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          format: email
+          maxLength: 254
+        password:
+          type: string
+          minLength: 8
+          maxLength: 128
+    AuthResponse:
+      type: object
+      additionalProperties: false
+      required: [accessToken, tokenType, expiresInSec, user]
+      properties:
+        accessToken:
+          type: string
+        tokenType:
+          type: string
+          const: Bearer
+        expiresInSec:
+          type: integer
+          const: 86400
+        user:
+          $ref: '#/components/schemas/User'
+    User:
+      type: object
+      additionalProperties: false
+      required: [userId, email, profileCompleted, createdAt]
+      properties:
+        userId:
+          type: string
+        email:
+          type: string
+          format: email
+        profileCompleted:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+    TravelerType:
+      type: string
+      enum:
+        - PREGNANT
+        - SENIOR
+        - MOBILITY_IMPAIRED
+        - TEMPORARILY_INJURED
+        - CAREGIVER_WITH_CHILD
+        - OTHER
+    MobilityAid:
+      type: string
+      enum:
+        - MANUAL_WHEELCHAIR
+        - POWER_WHEELCHAIR
+        - STROLLER
+        - CANE
+        - CRUTCHES
+        - WALKER
+    ProfilePreferences:
+      type: object
+      additionalProperties: false
+      required: [avoidStairs, elevatorRequired, lowFloorBusRequired, avoidSteepSlopes]
+      properties:
+        avoidStairs:
+          type: boolean
+        elevatorRequired:
+          type: boolean
+        lowFloorBusRequired:
+          type: boolean
+        avoidSteepSlopes:
+          type: boolean
+    WalkingSpeedProfile:
+      type: object
+      additionalProperties: false
+      required: [walkingSpeedMps, walkingSpeedSource, walkingSpeedSampleCount, updatedAt]
+      properties:
+        walkingSpeedMps:
+          type: number
+          exclusiveMinimum: 0
+          maximum: 3
+        walkingSpeedSource:
+          type: string
+          enum: [PROFILE_DEFAULT, LEARNED]
+        walkingSpeedSampleCount:
+          type: integer
+          minimum: 0
+        updatedAt:
+          type: string
+          format: date-time
+    UpdateProfileRequest:
+      type: object
+      additionalProperties: false
+      required: [travelerTypes, mobilityAids, preferences]
+      properties:
+        travelerTypes:
+          type: array
+          minItems: 1
+          uniqueItems: true
+          items:
+            $ref: '#/components/schemas/TravelerType'
+        mobilityAids:
+          type: array
+          uniqueItems: true
+          items:
+            $ref: '#/components/schemas/MobilityAid'
+        preferences:
+          $ref: '#/components/schemas/ProfilePreferences'
+    UserProfile:
+      type: object
+      additionalProperties: false
+      required: [userId, travelerTypes, mobilityAids, preferences, walkingSpeed]
+      properties:
+        userId:
+          type: string
+        travelerTypes:
+          type: array
+          minItems: 1
+          uniqueItems: true
+          items:
+            $ref: '#/components/schemas/TravelerType'
+        mobilityAids:
+          type: array
+          uniqueItems: true
+          items:
+            $ref: '#/components/schemas/MobilityAid'
+        preferences:
+          $ref: '#/components/schemas/ProfilePreferences'
+        walkingSpeed:
+          $ref: '#/components/schemas/WalkingSpeedProfile'
+    Coordinate:
+      type: object
+      additionalProperties: false
+      required: [latitude, longitude]
+      properties:
+        latitude:
+          type: number
+          minimum: -90
+          maximum: 90
+        longitude:
+          type: number
+          minimum: -180
+          maximum: 180
+    PlaceInput:
+      type: object
+      additionalProperties: false
+      required: [name, coordinate]
+      properties:
+        providerPlaceId:
+          type: string
+        name:
+          type: string
+          minLength: 1
+        address:
+          type: string
+        coordinate:
+          $ref: '#/components/schemas/Coordinate'
+    Place:
+      type: object
+      additionalProperties: false
+      required: [name, coordinate, provider, categoryName]
+      properties:
+        providerPlaceId:
+          type: string
+        name:
+          type: string
+          minLength: 1
+        address:
+          type: string
+        coordinate:
+          $ref: '#/components/schemas/Coordinate'
+        provider:
+          type: string
+          enum: [KAKAO, USER_LOCATION, TRANSIT_STATION]
+        roadAddress:
+          type: string
+        categoryName:
+          type: string
+        phone:
+          type: string
+        placeUrl:
+          type: string
+          format: uri
+        distanceM:
+          type: integer
+          minimum: 0
+    PlaceSearchResponse:
+      type: object
+      additionalProperties: false
+      required: [query, page, size, totalCount, places]
+      properties:
+        query:
+          type: string
+        page:
+          type: integer
+          minimum: 1
+        size:
+          type: integer
+          minimum: 1
+        totalCount:
+          type: integer
+          minimum: 0
+        places:
+          type: array
+          items:
+            $ref: '#/components/schemas/Place'
+    RouteMode:
+      type: string
+      enum: [TRANSIT, TAXI, WALK]
+    RouteSearchRequest:
+      type: object
+      additionalProperties: false
+      required: [origin, destination, mode]
+      properties:
+        origin:
+          $ref: '#/components/schemas/PlaceInput'
+        destination:
+          $ref: '#/components/schemas/PlaceInput'
+        mode:
+          $ref: '#/components/schemas/RouteMode'
+        departureAt:
+          type: string
+          format: date-time
+    SearchStatus:
+      type: string
+      enum: [SUCCESS, NO_ACCESSIBLE_ROUTE]
+    AccessibilityStatus:
+      type: string
+      enum: [ACCESSIBLE, CAUTION, UNAVAILABLE]
+    DataConfidence:
+      type: string
+      enum: [VERIFIED, ESTIMATED, UNKNOWN]
+    TimeSource:
+      type: string
+      enum: [REALTIME, SCHEDULED, ESTIMATED, UNKNOWN]
+    Severity:
+      type: string
+      enum: [INFO, WARNING, CRITICAL]
+    Notice:
+      type: object
+      additionalProperties: false
+      required: [code, severity, message]
+      properties:
+        code:
+          type: string
+        severity:
+          $ref: '#/components/schemas/Severity'
+        message:
+          type: string
+        legId:
+          type: string
+    GeoJsonLineString:
+      type: object
+      additionalProperties: false
+      required: [type, coordinates]
+      properties:
+        type:
+          type: string
+          const: LineString
+        coordinates:
+          type: array
+          minItems: 2
+          items:
+            type: array
+            prefixItems:
+              - type: number
+                minimum: -180
+                maximum: 180
+              - type: number
+                minimum: -90
+                maximum: 90
+            minItems: 2
+            maxItems: 2
+    RouteSummary:
+      type: object
+      additionalProperties: false
+      required:
+        - standardDurationSec
+        - personalizedDurationSec
+        - departureAt
+        - arrivalAt
+        - totalDistanceM
+        - walkDistanceM
+        - transferCount
+        - fareKrw
+      properties:
+        standardDurationSec:
+          type: integer
+          minimum: 0
+        personalizedDurationSec:
+          type: integer
+          minimum: 0
+        departureAt:
+          type: string
+          format: date-time
+        arrivalAt:
+          type: string
+          format: date-time
+        totalDistanceM:
+          type: integer
+          minimum: 0
+        walkDistanceM:
+          type: integer
+          minimum: 0
+        transferCount:
+          type: integer
+          minimum: 0
+        fareKrw:
+          type: integer
+          minimum: 0
+    BaseLeg:
+      type: object
+      required:
+        - legId
+        - mode
+        - start
+        - end
+        - distanceM
+        - standardDurationSec
+        - personalizedDurationSec
+        - geometry
+      properties:
+        legId:
+          type: string
+        mode:
+          type: string
+          enum: [WALK, BUS, SUBWAY, TAXI]
+        start:
+          $ref: '#/components/schemas/PlaceInput'
+        end:
+          $ref: '#/components/schemas/PlaceInput'
+        distanceM:
+          type: integer
+          minimum: 0
+        standardDurationSec:
+          type: integer
+          minimum: 0
+        personalizedDurationSec:
+          type: integer
+          minimum: 0
+        geometry:
+          $ref: '#/components/schemas/GeoJsonLineString'
+    WalkStep:
+      type: object
+      additionalProperties: false
+      required: [instruction, distanceM, geometry]
+      properties:
+        instruction:
+          type: string
+        distanceM:
+          type: integer
+          minimum: 0
+        streetName:
+          type: string
+        geometry:
+          $ref: '#/components/schemas/GeoJsonLineString'
+    WalkLeg:
+      unevaluatedProperties: false
+      allOf:
+        - $ref: '#/components/schemas/BaseLeg'
+        - type: object
+          required: [mode, steps, hasStairs, dataConfidence]
+          properties:
+            mode:
+              type: string
+              const: WALK
+            steps:
+              type: array
+              items:
+                $ref: '#/components/schemas/WalkStep'
+            maxSlopePercent:
+              type: number
+              minimum: 0
+            hasStairs:
+              type: boolean
+            dataConfidence:
+              $ref: '#/components/schemas/DataConfidence'
+    LowFloorStatus:
+      type: string
+      enum: [CONFIRMED, EXPECTED, NOT_LOW_FLOOR, UNKNOWN]
+    BusLeg:
+      unevaluatedProperties: false
+      allOf:
+        - $ref: '#/components/schemas/BaseLeg'
+        - type: object
+          required:
+            - mode
+            - routeId
+            - routeName
+            - boardingStop
+            - alightingStop
+            - lowFloorStatus
+            - departureAt
+            - arrivalAt
+            - timeSource
+            - dataConfidence
+          properties:
+            mode:
+              type: string
+              const: BUS
+            routeId:
+              type: string
+            routeName:
+              type: string
+            boardingStop:
+              $ref: '#/components/schemas/PlaceInput'
+            alightingStop:
+              $ref: '#/components/schemas/PlaceInput'
+            lowFloorStatus:
+              $ref: '#/components/schemas/LowFloorStatus'
+            departureAt:
+              type: string
+              format: date-time
+            arrivalAt:
+              type: string
+              format: date-time
+            timeSource:
+              $ref: '#/components/schemas/TimeSource'
+            dataConfidence:
+              $ref: '#/components/schemas/DataConfidence'
+    FacilityStatus:
+      type: string
+      enum: [AVAILABLE, UNAVAILABLE, UNKNOWN]
+    StationFacility:
+      type: object
+      additionalProperties: false
+      required: [type, status, dataConfidence]
+      properties:
+        type:
+          type: string
+          enum: [ELEVATOR, ESCALATOR, WHEELCHAIR_LIFT, ACCESSIBLE_TOILET]
+        status:
+          $ref: '#/components/schemas/FacilityStatus'
+        locationDescription:
+          type: string
+        observedAt:
+          type: string
+          format: date-time
+        dataConfidence:
+          $ref: '#/components/schemas/DataConfidence'
+    SubwayLeg:
+      unevaluatedProperties: false
+      allOf:
+        - $ref: '#/components/schemas/BaseLeg'
+        - type: object
+          required:
+            - mode
+            - lineId
+            - lineName
+            - boardingStation
+            - alightingStation
+            - departureAt
+            - arrivalAt
+            - timeSource
+            - facilities
+            - dataConfidence
+          properties:
+            mode:
+              type: string
+              const: SUBWAY
+            lineId:
+              type: string
+            lineName:
+              type: string
+            lineColor:
+              type: string
+              pattern: '^#[0-9A-Fa-f]{6}$'
+            boardingStation:
+              $ref: '#/components/schemas/PlaceInput'
+            alightingStation:
+              $ref: '#/components/schemas/PlaceInput'
+            departureAt:
+              type: string
+              format: date-time
+            arrivalAt:
+              type: string
+              format: date-time
+            timeSource:
+              $ref: '#/components/schemas/TimeSource'
+            facilities:
+              type: array
+              items:
+                $ref: '#/components/schemas/StationFacility'
+            dataConfidence:
+              $ref: '#/components/schemas/DataConfidence'
+    TaxiLeg:
+      unevaluatedProperties: false
+      allOf:
+        - $ref: '#/components/schemas/BaseLeg'
+        - type: object
+          required: [mode, expectedFareKrw, timeSource]
+          properties:
+            mode:
+              type: string
+              const: TAXI
+            expectedFareKrw:
+              type: integer
+              minimum: 0
+            timeSource:
+              $ref: '#/components/schemas/TimeSource'
+    RouteLeg:
+      oneOf:
+        - $ref: '#/components/schemas/WalkLeg'
+        - $ref: '#/components/schemas/BusLeg'
+        - $ref: '#/components/schemas/SubwayLeg'
+        - $ref: '#/components/schemas/TaxiLeg'
+      discriminator:
+        propertyName: mode
+        mapping:
+          WALK: '#/components/schemas/WalkLeg'
+          BUS: '#/components/schemas/BusLeg'
+          SUBWAY: '#/components/schemas/SubwayLeg'
+          TAXI: '#/components/schemas/TaxiLeg'
+    Route:
+      type: object
+      additionalProperties: false
+      required:
+        - routeId
+        - rank
+        - mode
+        - title
+        - accessibilityStatus
+        - dataConfidence
+        - summary
+        - warnings
+        - unavailableReasons
+        - legs
+      properties:
+        routeId:
+          type: string
+        rank:
+          type: integer
+          minimum: 1
+        mode:
+          $ref: '#/components/schemas/RouteMode'
+        title:
+          type: string
+        accessibilityStatus:
+          $ref: '#/components/schemas/AccessibilityStatus'
+        dataConfidence:
+          $ref: '#/components/schemas/DataConfidence'
+        summary:
+          $ref: '#/components/schemas/RouteSummary'
+        warnings:
+          type: array
+          items:
+            $ref: '#/components/schemas/Notice'
+        unavailableReasons:
+          type: array
+          items:
+            $ref: '#/components/schemas/Notice'
+        legs:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/RouteLeg'
+    RouteSearchResponse:
+      type: object
+      additionalProperties: false
+      required: [searchId, mode, status, generatedAt, expiresAt, routes, fallbackModes, notices]
+      properties:
+        searchId:
+          type: string
+        mode:
+          $ref: '#/components/schemas/RouteMode'
+        status:
+          $ref: '#/components/schemas/SearchStatus'
+        generatedAt:
+          type: string
+          format: date-time
+        expiresAt:
+          type: string
+          format: date-time
+        routes:
+          type: array
+          items:
+            $ref: '#/components/schemas/Route'
+        fallbackModes:
+          type: array
+          uniqueItems: true
+          items:
+            $ref: '#/components/schemas/RouteMode'
+        notices:
+          type: array
+          items:
+            $ref: '#/components/schemas/Notice'
+    StartNavigationRequest:
+      type: object
+      additionalProperties: false
+      required: [routeId]
+      properties:
+        routeId:
+          type: string
+          minLength: 1
+    NavigationStatus:
+      type: string
+      enum: [ACTIVE, REROUTE_SUGGESTED, COMPLETED, CANCELLED]
+    GuidanceInstruction:
+      type: object
+      additionalProperties: false
+      required: [instructionId, type, message, distanceToActionM]
+      properties:
+        instructionId:
+          type: string
+        type:
+          type: string
+          enum: [WALK, BOARD, ALIGHT, TRANSFER, ARRIVE]
+        message:
+          type: string
+        distanceToActionM:
+          type: integer
+          minimum: 0
+        expectedAt:
+          type: string
+          format: date-time
+    RerouteReason:
+      type: string
+      enum: [MISSED_TRANSIT, OFF_ROUTE, USER_REQUEST]
+    RerouteSuggestion:
+      type: object
+      additionalProperties: false
+      required: [reason, message, detectedAt]
+      properties:
+        reason:
+          $ref: '#/components/schemas/RerouteReason'
+        message:
+          type: string
+        detectedAt:
+          type: string
+          format: date-time
+    NavigationSession:
+      type: object
+      additionalProperties: false
+      required:
+        - sessionId
+        - status
+        - routeRevision
+        - route
+        - startedAt
+        - updatedAt
+        - nextInstruction
+      properties:
+        sessionId:
+          type: string
+        status:
+          $ref: '#/components/schemas/NavigationStatus'
+        routeRevision:
+          type: integer
+          minimum: 1
+        route:
+          $ref: '#/components/schemas/Route'
+        startedAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        nextInstruction:
+          $ref: '#/components/schemas/GuidanceInstruction'
+        rerouteSuggestion:
+          $ref: '#/components/schemas/RerouteSuggestion'
+    LocationSample:
+      type: object
+      additionalProperties: false
+      required: [coordinate, recordedAt, accuracyM]
+      properties:
+        coordinate:
+          $ref: '#/components/schemas/Coordinate'
+        recordedAt:
+          type: string
+          format: date-time
+        accuracyM:
+          type: number
+          minimum: 0
+    NavigationUpdate:
+      type: object
+      additionalProperties: false
+      required: [sessionId, status, routeRevision, updatedAt, nextInstruction]
+      properties:
+        sessionId:
+          type: string
+        status:
+          $ref: '#/components/schemas/NavigationStatus'
+        routeRevision:
+          type: integer
+          minimum: 1
+        updatedAt:
+          type: string
+          format: date-time
+        nextInstruction:
+          $ref: '#/components/schemas/GuidanceInstruction'
+        rerouteSuggestion:
+          $ref: '#/components/schemas/RerouteSuggestion'
+    RerouteRequest:
+      type: object
+      additionalProperties: false
+      required: [reason]
+      anyOf:
+        - required: [currentLocation]
+        - required: [currentStation]
+      properties:
+        reason:
+          $ref: '#/components/schemas/RerouteReason'
+        currentLocation:
+          $ref: '#/components/schemas/LocationSample'
+        currentStation:
+          $ref: '#/components/schemas/PlaceInput'
+    CompleteNavigationRequest:
+      type: object
+      additionalProperties: false
+      required: [reason, completedAt]
+      properties:
+        reason:
+          type: string
+          enum: [ARRIVED, USER_STOPPED]
+        completedAt:
+          type: string
+          format: date-time
+    NavigationCompletion:
+      type: object
+      additionalProperties: false
+      required:
+        - sessionId
+        - status
+        - routeRevision
+        - completedAt
+        - walkingSpeedUpdated
+        - walkingSpeed
+      properties:
+        sessionId:
+          type: string
+        status:
+          type: string
+          const: COMPLETED
+        routeRevision:
+          type: integer
+          minimum: 1
+        completedAt:
+          type: string
+          format: date-time
+        walkingSpeedUpdated:
+          type: boolean
+        walkingSpeed:
+          $ref: '#/components/schemas/WalkingSpeedProfile'
+    ErrorDetail:
+      type: object
+      additionalProperties: true
+      required: [code, message, requestId, details]
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        requestId:
+          type: string
+        details:
+          type: object
+          additionalProperties: true
+    ErrorResponse:
+      type: object
+      additionalProperties: false
+      required: [error]
+      properties:
+        error:
+          $ref: '#/components/schemas/ErrorDetail'
+security:
+  - bearerAuth: []

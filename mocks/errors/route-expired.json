@@ -1,0 +1,11 @@
+{
+  "error": {
+    "code": "ROUTE_EXPIRED",
+    "message": "경로 정보가 만료되었습니다. 다시 검색해 주세요.",
+    "requestId": "req_demo_route_410",
+    "details": {
+      "routeId": "route_transit_accessible_001",
+      "expiredAt": "2026-07-15T14:10:00+09:00"
+    }
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "accessToken": "mock.header.returning-user.signature",
+  "tokenType": "Bearer",
+  "expiresInSec": 86400,
+  "user": {
+    "userId": "usr_demo_001",
+    "email": "demo@example.com",
+    "profileCompleted": true,
+    "createdAt": "2026-07-15T13:00:00+09:00"
+  }
+}

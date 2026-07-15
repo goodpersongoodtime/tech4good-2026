@@ -1,0 +1,320 @@
+{
+  "searchId": "search_transit_accessible_001",
+  "mode": "TRANSIT",
+  "status": "SUCCESS",
+  "generatedAt": "2026-07-15T14:00:00+09:00",
+  "expiresAt": "2026-07-15T14:10:00+09:00",
+  "routes": [
+    {
+      "routeId": "route_transit_accessible_001",
+      "rank": 1,
+      "mode": "TRANSIT",
+      "title": "1호선 → 2호선, 엘리베이터 이용",
+      "accessibilityStatus": "ACCESSIBLE",
+      "dataConfidence": "VERIFIED",
+      "summary": {
+        "standardDurationSec": 2100,
+        "personalizedDurationSec": 2700,
+        "departureAt": "2026-07-15T14:00:00+09:00",
+        "arrivalAt": "2026-07-15T14:45:00+09:00",
+        "totalDistanceM": 15200,
+        "walkDistanceM": 900,
+        "transferCount": 1,
+        "fareKrw": 1500
+      },
+      "warnings": [
+        {
+          "code": "PERSONALIZED_TIME_LONGER",
+          "severity": "INFO",
+          "message": "개인 이동속도를 반영하면 일반 안내보다 10분 더 걸립니다."
+        }
+      ],
+      "unavailableReasons": [],
+      "legs": [
+        {
+          "legId": "leg_access_01",
+          "mode": "WALK",
+          "start": {
+            "providerPlaceId": "kakao_place_seoul_station_001",
+            "name": "서울역",
+            "coordinate": {
+              "latitude": 37.5547,
+              "longitude": 126.9707
+            }
+          },
+          "end": {
+            "providerPlaceId": "station_seoul_133",
+            "name": "서울역 1호선 엘리베이터 입구",
+            "coordinate": {
+              "latitude": 37.5560,
+              "longitude": 126.9721
+            }
+          },
+          "distanceM": 300,
+          "standardDurationSec": 300,
+          "personalizedDurationSec": 450,
+          "geometry": {
+            "type": "LineString",
+            "coordinates": [
+              [126.9707, 37.5547],
+              [126.9713, 37.5553],
+              [126.9721, 37.5560]
+            ]
+          },
+          "steps": [
+            {
+              "instruction": "한강대로를 따라 엘리베이터 입구까지 이동하세요.",
+              "distanceM": 300,
+              "streetName": "한강대로",
+              "geometry": {
+                "type": "LineString",
+                "coordinates": [
+                  [126.9707, 37.5547],
+                  [126.9713, 37.5553],
+                  [126.9721, 37.5560]
+                ]
+              }
+            }
+          ],
+          "maxSlopePercent": 3.2,
+          "hasStairs": false,
+          "dataConfidence": "VERIFIED"
+        },
+        {
+          "legId": "leg_access_02",
+          "mode": "SUBWAY",
+          "start": {
+            "providerPlaceId": "station_seoul_133",
+            "name": "서울역",
+            "coordinate": {
+              "latitude": 37.5560,
+              "longitude": 126.9721
+            }
+          },
+          "end": {
+            "providerPlaceId": "station_cityhall_132",
+            "name": "시청역",
+            "coordinate": {
+              "latitude": 37.5657,
+              "longitude": 126.9770
+            }
+          },
+          "distanceM": 1000,
+          "standardDurationSec": 120,
+          "personalizedDurationSec": 120,
+          "geometry": {
+            "type": "LineString",
+            "coordinates": [
+              [126.9721, 37.5560],
+              [126.9750, 37.5608],
+              [126.9770, 37.5657]
+            ]
+          },
+          "lineId": "SUBWAY_LINE_1",
+          "lineName": "1호선",
+          "lineColor": "#0052A4",
+          "boardingStation": {
+            "providerPlaceId": "station_seoul_133",
+            "name": "서울역",
+            "coordinate": {
+              "latitude": 37.5560,
+              "longitude": 126.9721
+            }
+          },
+          "alightingStation": {
+            "providerPlaceId": "station_cityhall_132",
+            "name": "시청역",
+            "coordinate": {
+              "latitude": 37.5657,
+              "longitude": 126.9770
+            }
+          },
+          "departureAt": "2026-07-15T14:08:00+09:00",
+          "arrivalAt": "2026-07-15T14:10:00+09:00",
+          "timeSource": "SCHEDULED",
+          "facilities": [
+            {
+              "type": "ELEVATOR",
+              "status": "AVAILABLE",
+              "locationDescription": "서울역 1번 출구 방면",
+              "observedAt": "2026-07-15T13:55:00+09:00",
+              "dataConfidence": "VERIFIED"
+            },
+            {
+              "type": "ELEVATOR",
+              "status": "AVAILABLE",
+              "locationDescription": "시청역 1호선-2호선 환승 통로",
+              "observedAt": "2026-07-15T13:55:00+09:00",
+              "dataConfidence": "VERIFIED"
+            }
+          ],
+          "dataConfidence": "VERIFIED"
+        },
+        {
+          "legId": "leg_access_03",
+          "mode": "WALK",
+          "start": {
+            "providerPlaceId": "station_cityhall_132",
+            "name": "시청역 1호선 승강장",
+            "coordinate": {
+              "latitude": 37.5657,
+              "longitude": 126.9770
+            }
+          },
+          "end": {
+            "providerPlaceId": "station_cityhall_201",
+            "name": "시청역 2호선 승강장",
+            "coordinate": {
+              "latitude": 37.5640,
+              "longitude": 126.9768
+            }
+          },
+          "distanceM": 200,
+          "standardDurationSec": 240,
+          "personalizedDurationSec": 420,
+          "geometry": {
+            "type": "LineString",
+            "coordinates": [
+              [126.9770, 37.5657],
+              [126.9769, 37.5648],
+              [126.9768, 37.5640]
+            ]
+          },
+          "steps": [
+            {
+              "instruction": "환승 엘리베이터를 이용해 2호선 내선 승강장으로 이동하세요.",
+              "distanceM": 200,
+              "streetName": "시청역 환승 통로",
+              "geometry": {
+                "type": "LineString",
+                "coordinates": [
+                  [126.9770, 37.5657],
+                  [126.9769, 37.5648],
+                  [126.9768, 37.5640]
+                ]
+              }
+            }
+          ],
+          "maxSlopePercent": 2.0,
+          "hasStairs": false,
+          "dataConfidence": "VERIFIED"
+        },
+        {
+          "legId": "leg_access_04",
+          "mode": "SUBWAY",
+          "start": {
+            "providerPlaceId": "station_cityhall_201",
+            "name": "시청역",
+            "coordinate": {
+              "latitude": 37.5640,
+              "longitude": 126.9768
+            }
+          },
+          "end": {
+            "providerPlaceId": "station_jamsil_216",
+            "name": "잠실역",
+            "coordinate": {
+              "latitude": 37.5133,
+              "longitude": 127.1001
+            }
+          },
+          "distanceM": 13300,
+          "standardDurationSec": 1320,
+          "personalizedDurationSec": 1320,
+          "geometry": {
+            "type": "LineString",
+            "coordinates": [
+              [126.9768, 37.5640],
+              [127.0090, 37.5480],
+              [127.0450, 37.5200],
+              [127.1001, 37.5133]
+            ]
+          },
+          "lineId": "SUBWAY_LINE_2",
+          "lineName": "2호선",
+          "lineColor": "#00A84D",
+          "boardingStation": {
+            "providerPlaceId": "station_cityhall_201",
+            "name": "시청역",
+            "coordinate": {
+              "latitude": 37.5640,
+              "longitude": 126.9768
+            }
+          },
+          "alightingStation": {
+            "providerPlaceId": "station_jamsil_216",
+            "name": "잠실역",
+            "coordinate": {
+              "latitude": 37.5133,
+              "longitude": 127.1001
+            }
+          },
+          "departureAt": "2026-07-15T14:17:00+09:00",
+          "arrivalAt": "2026-07-15T14:39:00+09:00",
+          "timeSource": "SCHEDULED",
+          "facilities": [
+            {
+              "type": "ELEVATOR",
+              "status": "AVAILABLE",
+              "locationDescription": "잠실역 2호선 승강장 동측",
+              "observedAt": "2026-07-15T13:55:00+09:00",
+              "dataConfidence": "VERIFIED"
+            }
+          ],
+          "dataConfidence": "VERIFIED"
+        },
+        {
+          "legId": "leg_access_05",
+          "mode": "WALK",
+          "start": {
+            "providerPlaceId": "station_jamsil_216",
+            "name": "잠실역 2호선 승강장",
+            "coordinate": {
+              "latitude": 37.5133,
+              "longitude": 127.1001
+            }
+          },
+          "end": {
+            "providerPlaceId": "kakao_place_jamsil_001",
+            "name": "잠실역 2번 출구",
+            "coordinate": {
+              "latitude": 37.5141,
+              "longitude": 127.1022
+            }
+          },
+          "distanceM": 400,
+          "standardDurationSec": 120,
+          "personalizedDurationSec": 390,
+          "geometry": {
+            "type": "LineString",
+            "coordinates": [
+              [127.1001, 37.5133],
+              [127.1011, 37.5137],
+              [127.1022, 37.5141]
+            ]
+          },
+          "steps": [
+            {
+              "instruction": "엘리베이터를 이용해 2번 출구로 이동하세요.",
+              "distanceM": 400,
+              "streetName": "잠실역 대합실",
+              "geometry": {
+                "type": "LineString",
+                "coordinates": [
+                  [127.1001, 37.5133],
+                  [127.1011, 37.5137],
+                  [127.1022, 37.5141]
+                ]
+              }
+            }
+          ],
+          "maxSlopePercent": 2.5,
+          "hasStairs": false,
+          "dataConfidence": "VERIFIED"
+        }
+      ]
+    }
+  ],
+  "fallbackModes": [],
+  "notices": []
+}

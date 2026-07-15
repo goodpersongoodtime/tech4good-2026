@@ -1,0 +1,10 @@
+{
+  "error": {
+    "code": "EMAIL_ALREADY_EXISTS",
+    "message": "이미 가입된 이메일입니다.",
+    "requestId": "req_demo_409",
+    "details": {
+      "field": "email"
+    }
+  }
+}

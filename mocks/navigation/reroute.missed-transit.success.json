@@ -1,0 +1,162 @@
+{
+  "sessionId": "nav_session_001",
+  "status": "ACTIVE",
+  "routeRevision": 2,
+  "route": {
+    "routeId": "route_nav_rerouted_002",
+    "rank": 1,
+    "mode": "TRANSIT",
+    "title": "다음 2호선 열차로 갱신된 경로",
+    "accessibilityStatus": "ACCESSIBLE",
+    "dataConfidence": "VERIFIED",
+    "summary": {
+      "standardDurationSec": 1980,
+      "personalizedDurationSec": 2220,
+      "departureAt": "2026-07-15T14:18:10+09:00",
+      "arrivalAt": "2026-07-15T14:55:10+09:00",
+      "totalDistanceM": 13700,
+      "walkDistanceM": 400,
+      "transferCount": 0,
+      "fareKrw": 1500
+    },
+    "warnings": [
+      {
+        "code": "ROUTE_RECALCULATED",
+        "severity": "INFO",
+        "message": "시청역을 새 출발점으로 다음 열차에 맞춰 경로를 갱신했습니다."
+      }
+    ],
+    "unavailableReasons": [],
+    "legs": [
+      {
+        "legId": "leg_nav_reroute_01",
+        "mode": "SUBWAY",
+        "start": {
+          "providerPlaceId": "station_cityhall_201",
+          "name": "시청역",
+          "coordinate": {
+            "latitude": 37.5640,
+            "longitude": 126.9768
+          }
+        },
+        "end": {
+          "providerPlaceId": "station_jamsil_216",
+          "name": "잠실역",
+          "coordinate": {
+            "latitude": 37.5133,
+            "longitude": 127.1001
+          }
+        },
+        "distanceM": 13300,
+        "standardDurationSec": 1320,
+        "personalizedDurationSec": 1320,
+        "geometry": {
+          "type": "LineString",
+          "coordinates": [
+            [126.9768, 37.5640],
+            [127.0090, 37.5480],
+            [127.0450, 37.5200],
+            [127.1001, 37.5133]
+          ]
+        },
+        "lineId": "SUBWAY_LINE_2",
+        "lineName": "2호선",
+        "lineColor": "#00A84D",
+        "boardingStation": {
+          "providerPlaceId": "station_cityhall_201",
+          "name": "시청역",
+          "coordinate": {
+            "latitude": 37.5640,
+            "longitude": 126.9768
+          }
+        },
+        "alightingStation": {
+          "providerPlaceId": "station_jamsil_216",
+          "name": "잠실역",
+          "coordinate": {
+            "latitude": 37.5133,
+            "longitude": 127.1001
+          }
+        },
+        "departureAt": "2026-07-15T14:25:00+09:00",
+        "arrivalAt": "2026-07-15T14:47:00+09:00",
+        "timeSource": "SCHEDULED",
+        "facilities": [
+          {
+            "type": "ELEVATOR",
+            "status": "AVAILABLE",
+            "locationDescription": "시청역 2호선 승강장 동측",
+            "observedAt": "2026-07-15T14:18:00+09:00",
+            "dataConfidence": "VERIFIED"
+          },
+          {
+            "type": "ELEVATOR",
+            "status": "AVAILABLE",
+            "locationDescription": "잠실역 2호선 승강장 동측",
+            "observedAt": "2026-07-15T14:18:00+09:00",
+            "dataConfidence": "VERIFIED"
+          }
+        ],
+        "dataConfidence": "VERIFIED"
+      },
+      {
+        "legId": "leg_nav_reroute_02",
+        "mode": "WALK",
+        "start": {
+          "providerPlaceId": "station_jamsil_216",
+          "name": "잠실역 2호선 승강장",
+          "coordinate": {
+            "latitude": 37.5133,
+            "longitude": 127.1001
+          }
+        },
+        "end": {
+          "providerPlaceId": "kakao_place_jamsil_001",
+          "name": "잠실역 2번 출구",
+          "coordinate": {
+            "latitude": 37.5141,
+            "longitude": 127.1022
+          }
+        },
+        "distanceM": 400,
+        "standardDurationSec": 240,
+        "personalizedDurationSec": 480,
+        "geometry": {
+          "type": "LineString",
+          "coordinates": [
+            [127.1001, 37.5133],
+            [127.1011, 37.5137],
+            [127.1022, 37.5141]
+          ]
+        },
+        "steps": [
+          {
+            "instruction": "엘리베이터를 이용해 2번 출구로 이동하세요.",
+            "distanceM": 400,
+            "streetName": "잠실역 대합실",
+            "geometry": {
+              "type": "LineString",
+              "coordinates": [
+                [127.1001, 37.5133],
+                [127.1011, 37.5137],
+                [127.1022, 37.5141]
+              ]
+            }
+          }
+        ],
+        "maxSlopePercent": 2.5,
+        "hasStairs": false,
+        "dataConfidence": "VERIFIED"
+      }
+    ]
+  },
+  "startedAt": "2026-07-15T14:10:00+09:00",
+  "updatedAt": "2026-07-15T14:18:20+09:00",
+  "nextInstruction": {
+    "instructionId": "instruction_board_002",
+    "type": "BOARD",
+    "message": "7분 후 도착하는 다음 2호선 내선 열차를 타세요.",
+    "distanceToActionM": 30,
+    "expectedAt": "2026-07-15T14:25:00+09:00"
+  }
+}

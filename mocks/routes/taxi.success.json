@@ -1,0 +1,79 @@
+{
+  "searchId": "search_taxi_001",
+  "mode": "TAXI",
+  "status": "SUCCESS",
+  "generatedAt": "2026-07-15T14:00:00+09:00",
+  "expiresAt": "2026-07-15T14:10:00+09:00",
+  "routes": [
+    {
+      "routeId": "route_taxi_001",
+      "rank": 1,
+      "mode": "TAXI",
+      "title": "택시 예상 경로",
+      "accessibilityStatus": "CAUTION",
+      "dataConfidence": "ESTIMATED",
+      "summary": {
+        "standardDurationSec": 540,
+        "personalizedDurationSec": 540,
+        "departureAt": "2026-07-15T14:00:00+09:00",
+        "arrivalAt": "2026-07-15T14:09:00+09:00",
+        "totalDistanceM": 2500,
+        "walkDistanceM": 0,
+        "transferCount": 0,
+        "fareKrw": 7200
+      },
+      "warnings": [
+        {
+          "code": "WHEELCHAIR_TAXI_NOT_GUARANTEED",
+          "severity": "WARNING",
+          "message": "예상 경로와 요금이며 휠체어 탑승 가능한 차량 배차를 보장하지 않습니다."
+        }
+      ],
+      "unavailableReasons": [],
+      "legs": [
+        {
+          "legId": "leg_taxi_01",
+          "mode": "TAXI",
+          "start": {
+            "providerPlaceId": "kakao_place_seoul_station_001",
+            "name": "서울역",
+            "coordinate": {
+              "latitude": 37.5547,
+              "longitude": 126.9707
+            }
+          },
+          "end": {
+            "providerPlaceId": "kakao_place_cityhall_001",
+            "name": "서울시청",
+            "coordinate": {
+              "latitude": 37.5663,
+              "longitude": 126.9779
+            }
+          },
+          "distanceM": 2500,
+          "standardDurationSec": 540,
+          "personalizedDurationSec": 540,
+          "geometry": {
+            "type": "LineString",
+            "coordinates": [
+              [126.9707, 37.5547],
+              [126.9725, 37.5580],
+              [126.9758, 37.5630],
+              [126.9779, 37.5663]
+            ]
+          },
+          "expectedFareKrw": 7200,
+          "timeSource": "ESTIMATED"
+        }
+      ]
+    }
+  ],
+  "fallbackModes": [],
+  "notices": [
+    {
+      "code": "ESTIMATED_TAXI_INFORMATION",
+      "severity": "INFO",
+      "message": "교통 상황과 호출 차량에 따라 시간과 요금이 달라질 수 있습니다."
+    }
+  ]
+}

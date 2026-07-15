@@ -1,0 +1,11 @@
+{
+  "error": {
+    "code": "UPSTREAM_UNAVAILABLE",
+    "message": "현재 경로 정보를 불러오지 못했습니다.",
+    "requestId": "req_demo_503",
+    "details": {
+      "provider": "TMAP",
+      "retryable": true
+    }
+  }
+}

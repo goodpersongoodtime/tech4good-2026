@@ -1,0 +1,18 @@
+{
+  "sessionId": "nav_session_001",
+  "status": "REROUTE_SUGGESTED",
+  "routeRevision": 1,
+  "updatedAt": "2026-07-15T14:18:10+09:00",
+  "nextInstruction": {
+    "instructionId": "instruction_board_001",
+    "type": "BOARD",
+    "message": "예정된 열차 출발시각이 지났습니다.",
+    "distanceToActionM": 30,
+    "expectedAt": "2026-07-15T14:17:00+09:00"
+  },
+  "rerouteSuggestion": {
+    "reason": "MISSED_TRANSIT",
+    "message": "지하철을 놓친 것 같아요. 현재 위치에서 경로를 다시 찾을까요?",
+    "detectedAt": "2026-07-15T14:18:10+09:00"
+  }
+}

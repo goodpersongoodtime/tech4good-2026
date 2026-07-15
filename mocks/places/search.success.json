@@ -1,0 +1,38 @@
+{
+  "query": "서울역",
+  "page": 1,
+  "size": 10,
+  "totalCount": 2,
+  "places": [
+    {
+      "providerPlaceId": "kakao_place_seoul_station_001",
+      "name": "서울역",
+      "address": "서울특별시 용산구 동자동 43-205",
+      "coordinate": {
+        "latitude": 37.5547,
+        "longitude": 126.9707
+      },
+      "provider": "KAKAO",
+      "roadAddress": "서울특별시 용산구 한강대로 405",
+      "categoryName": "교통,수송 > 기차,철도 > 기차역",
+      "phone": "1544-7788",
+      "placeUrl": "https://place.map.kakao.com/000000001",
+      "distanceM": 120
+    },
+    {
+      "providerPlaceId": "kakao_place_seoul_subway_001",
+      "name": "서울역 1호선",
+      "address": "서울특별시 중구 봉래동2가 122-21",
+      "coordinate": {
+        "latitude": 37.5560,
+        "longitude": 126.9723
+      },
+      "provider": "KAKAO",
+      "roadAddress": "서울특별시 중구 세종대로 지하 2",
+      "categoryName": "교통,수송 > 지하철,전철 > 수도권1호선",
+      "phone": "",
+      "placeUrl": "https://place.map.kakao.com/000000002",
+      "distanceM": 260
+    }
+  ]
+}

@@ -1,0 +1,107 @@
+{
+  "searchId": "search_walk_001",
+  "mode": "WALK",
+  "status": "SUCCESS",
+  "generatedAt": "2026-07-15T14:00:00+09:00",
+  "expiresAt": "2026-07-15T14:10:00+09:00",
+  "routes": [
+    {
+      "routeId": "route_walk_001",
+      "rank": 1,
+      "mode": "WALK",
+      "title": "계단을 피하는 도보 경로",
+      "accessibilityStatus": "ACCESSIBLE",
+      "dataConfidence": "ESTIMATED",
+      "summary": {
+        "standardDurationSec": 1500,
+        "personalizedDurationSec": 2340,
+        "departureAt": "2026-07-15T14:00:00+09:00",
+        "arrivalAt": "2026-07-15T14:39:00+09:00",
+        "totalDistanceM": 1900,
+        "walkDistanceM": 1900,
+        "transferCount": 0,
+        "fareKrw": 0
+      },
+      "warnings": [
+        {
+          "code": "PERSONALIZED_TIME_LONGER",
+          "severity": "INFO",
+          "message": "개인 이동속도를 반영하면 일반 안내보다 14분 더 걸립니다."
+        },
+        {
+          "code": "WALKWAY_DATA_ESTIMATED",
+          "severity": "WARNING",
+          "message": "일부 구간의 경사 정보는 추정값입니다.",
+          "legId": "leg_walk_01"
+        }
+      ],
+      "unavailableReasons": [],
+      "legs": [
+        {
+          "legId": "leg_walk_01",
+          "mode": "WALK",
+          "start": {
+            "providerPlaceId": "kakao_place_seoul_station_001",
+            "name": "서울역",
+            "coordinate": {
+              "latitude": 37.5547,
+              "longitude": 126.9707
+            }
+          },
+          "end": {
+            "providerPlaceId": "kakao_place_cityhall_001",
+            "name": "서울시청",
+            "coordinate": {
+              "latitude": 37.5663,
+              "longitude": 126.9779
+            }
+          },
+          "distanceM": 1900,
+          "standardDurationSec": 1500,
+          "personalizedDurationSec": 2340,
+          "geometry": {
+            "type": "LineString",
+            "coordinates": [
+              [126.9707, 37.5547],
+              [126.9719, 37.5585],
+              [126.9745, 37.5620],
+              [126.9779, 37.5663]
+            ]
+          },
+          "steps": [
+            {
+              "instruction": "한강대로의 보행로를 따라 북쪽으로 이동하세요.",
+              "distanceM": 800,
+              "streetName": "한강대로",
+              "geometry": {
+                "type": "LineString",
+                "coordinates": [
+                  [126.9707, 37.5547],
+                  [126.9719, 37.5585]
+                ]
+              }
+            },
+            {
+              "instruction": "세종대로의 횡단보도와 경사로를 이용해 이동하세요.",
+              "distanceM": 1100,
+              "streetName": "세종대로",
+              "geometry": {
+                "type": "LineString",
+                "coordinates": [
+                  [126.9719, 37.5585],
+                  [126.9745, 37.5620],
+                  [126.9779, 37.5663]
+                ]
+              }
+            }
+          ],
+          "maxSlopePercent": 5.4,
+          "hasStairs": false,
+          "dataConfidence": "ESTIMATED"
+        }
+      ]
+    }
+  ],
+  "fallbackModes": [],
+  "notices": []
+}

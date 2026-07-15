@@ -1,0 +1,12 @@
+{
+  "error": {
+    "code": "RATE_LIMITED",
+    "message": "경로 검색 요청이 많습니다. 잠시 후 다시 시도해 주세요.",
+    "requestId": "req_demo_429",
+    "details": {
+      "provider": "TMAP",
+      "retryable": true,
+      "retryAfterSec": 60
+    }
+  }
+}

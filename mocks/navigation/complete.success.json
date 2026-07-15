@@ -1,0 +1,13 @@
+{
+  "sessionId": "nav_session_001",
+  "status": "COMPLETED",
+  "routeRevision": 2,
+  "completedAt": "2026-07-15T14:55:10+09:00",
+  "walkingSpeedUpdated": true,
+  "walkingSpeed": {
+    "walkingSpeedMps": 0.79,
+    "walkingSpeedSource": "LEARNED",
+    "walkingSpeedSampleCount": 13,
+    "updatedAt": "2026-07-15T14:55:10+09:00"
+  }
+}

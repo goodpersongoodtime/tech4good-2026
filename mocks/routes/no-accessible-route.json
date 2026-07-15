@@ -1,0 +1,23 @@
+{
+  "searchId": "search_no_accessible_001",
+  "mode": "TRANSIT",
+  "status": "NO_ACCESSIBLE_ROUTE",
+  "generatedAt": "2026-07-15T14:00:00+09:00",
+  "expiresAt": "2026-07-15T14:10:00+09:00",
+  "routes": [],
+  "fallbackModes": [
+    "TAXI"
+  ],
+  "notices": [
+    {
+      "code": "LOW_FLOOR_BUS_UNAVAILABLE",
+      "severity": "WARNING",
+      "message": "필수 조건을 충족하는 저상버스 경로를 찾지 못했습니다."
+    },
+    {
+      "code": "TAXI_FALLBACK_AVAILABLE",
+      "severity": "INFO",
+      "message": "택시 예상 경로와 요금을 확인할 수 있습니다."
+    }
+  ]
+}

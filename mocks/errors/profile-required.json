@@ -1,0 +1,10 @@
+{
+  "error": {
+    "code": "PROFILE_REQUIRED",
+    "message": "경로를 검색하기 전에 이동 프로필을 등록해 주세요.",
+    "requestId": "req_demo_profile_422",
+    "details": {
+      "redirectTo": "/profile/setup"
+    }
+  }
+}

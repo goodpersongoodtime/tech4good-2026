@@ -1,0 +1,21 @@
+{
+  "userId": "usr_demo_001",
+  "travelerTypes": [
+    "MOBILITY_IMPAIRED"
+  ],
+  "mobilityAids": [
+    "MANUAL_WHEELCHAIR"
+  ],
+  "preferences": {
+    "avoidStairs": true,
+    "elevatorRequired": true,
+    "lowFloorBusRequired": true,
+    "avoidSteepSlopes": true
+  },
+  "walkingSpeed": {
+    "walkingSpeedMps": 0.8,
+    "walkingSpeedSource": "LEARNED",
+    "walkingSpeedSampleCount": 12,
+    "updatedAt": "2026-07-15T12:40:00+09:00"
+  }
+}
