@@ -19,6 +19,7 @@ class Settings(BaseSettings):
     tmap_app_key: str | None = None
     seoul_api_key: str | None = None
     seoul_subway_api_key: str | None = None
+    seoul_bus_api_key: str | None = None
     route_ttl_sec: int = 600
     navigation_ttl_sec: int = 7200
     upstream_timeout_sec: float = 5.0

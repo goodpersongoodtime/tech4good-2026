@@ -5,6 +5,7 @@ from dataclasses import dataclass
 from datetime import datetime, timedelta
 from uuid import uuid4
 
+from app.domain import ProviderRoute
 from app.errors import ApiError
 from app.models import (
     AccessibilityStatus,
@@ -34,7 +35,7 @@ class RouteService:
         accessibility: AccessibilityContextProvider,
         engine: PersonalizationEngine,
         store: MemoryTTLStore[StoredRoute],
-        search_cache: MemoryTTLStore[RouteSearchResponse] | None = None,
+        provider_cache: MemoryTTLStore[list[ProviderRoute]] | None = None,
         ttl_sec: int = 600,
         clock: Callable[[], datetime] | None = None,
     ) -> None:
@@ -44,20 +45,22 @@ class RouteService:
         self.store = store
         self.ttl_sec = ttl_sec
         self.clock = clock or (lambda: datetime.now().astimezone())
-        self.search_cache = search_cache or MemoryTTLStore[RouteSearchResponse](
+        self.provider_cache = provider_cache or MemoryTTLStore[list[ProviderRoute]](
             clock=self.clock
         )
 
     async def search(
         self, request: RouteSearchRequest, profile: UserProfile
     ) -> RouteSearchResponse:
-        cache_key = self._cache_key(request, profile)
-        cached = self.search_cache.get(cache_key)
+        cache_key = self._provider_cache_key(request)
+        cached = self.provider_cache.get(cache_key)
         if cached.state == StoreState.ACTIVE and cached.value is not None:
-            return cached.value
+            candidates = cached.value
+        else:
+            candidates = await self.provider.search(request)
+            self.provider_cache.put(cache_key, candidates, self.ttl_sec)
         generated_at = self.clock()
         requested_at = request.departure_at or generated_at
-        candidates = await self.provider.search(request)
         context = await self.accessibility.get_context(candidates)
         personalized = self.engine.personalize_routes(
             candidates, profile, context, requested_at
@@ -116,7 +119,6 @@ class RouteService:
             fallback_modes=fallbacks,
             notices=notices,
         )
-        self.search_cache.put(cache_key, response, self.ttl_sec)
         return response
 
     def get_stored_route(self, route_id: str) -> StoredRoute:
@@ -131,10 +133,7 @@ class RouteService:
         return self.get_stored_route(route_id).route
 
     @staticmethod
-    def _cache_key(request: RouteSearchRequest, profile: UserProfile) -> str:
-        value = {
-            "request": request.model_dump(mode="json", by_alias=True, exclude_none=True),
-            "profile": profile.model_dump(mode="json", by_alias=True, exclude_none=True),
-        }
+    def _provider_cache_key(request: RouteSearchRequest) -> str:
+        value = request.model_dump(mode="json", by_alias=True, exclude_none=True)
         serialized = json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
         return hashlib.sha256(serialized.encode("utf-8")).hexdigest()

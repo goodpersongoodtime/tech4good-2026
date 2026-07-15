@@ -25,16 +25,22 @@ class CountingProvider:
 
 
 class FixedAccessibilityProvider(HybridAccessibilityProvider):
+    def __init__(self) -> None:
+        super().__init__()
+        self.calls = 0
+
     async def get_context(self, routes):
+        self.calls += 1
         return await super().get_context(routes)
 
 
 @pytest.mark.asyncio
-async def test_identical_search_and_profile_reuse_ten_minute_result() -> None:
+async def test_tmap_candidates_are_cached_but_realtime_enrichment_is_refreshed() -> None:
     provider = CountingProvider()
+    accessibility = FixedAccessibilityProvider()
     service = RouteService(
         provider=provider,
-        accessibility=FixedAccessibilityProvider(),
+        accessibility=accessibility,
         engine=BaselinePersonalizationEngine(),
         store=MemoryTTLStore[StoredRoute](clock=lambda: NOW),
         clock=lambda: NOW,
@@ -57,5 +63,6 @@ async def test_identical_search_and_profile_reuse_ten_minute_result() -> None:
     second = await service.search(request, demo_profile())
 
     assert provider.calls == 1
-    assert second.search_id == first.search_id
-    assert second.routes[0].route_id == first.routes[0].route_id
+    assert accessibility.calls == 2
+    assert second.search_id != first.search_id
+    assert second.routes[0].route_id != first.routes[0].route_id

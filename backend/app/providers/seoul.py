@@ -16,6 +16,14 @@ class SeoulElevator:
     confidence: DataConfidence = DataConfidence.VERIFIED
 
 
+@dataclass(frozen=True)
+class SeoulSubwayArrival:
+    arrival_sec: int
+    train_id: str | None
+    direction: str | None
+    terminal_station: str | None
+
+
 class SeoulDataClient:
     elevator_base_url = "http://openapi.seoul.go.kr:8088"
     subway_base_url = "http://swopenAPI.seoul.go.kr/api/subway"
@@ -73,21 +81,39 @@ class SeoulDataClient:
         return self._elevator_rows
 
     async def get_next_arrival_sec(self, station_name: str) -> int | None:
+        arrivals = await self.get_subway_arrivals(station_name)
+        return arrivals[0].arrival_sec if arrivals else None
+
+    async def get_subway_arrivals(
+        self, station_name: str, line_name: str | None = None
+    ) -> list[SeoulSubwayArrival]:
         encoded = quote(self._station_key(station_name), safe="")
         url = (
             f"{self.subway_base_url}/{self.subway_api_key}/json/"
             f"realtimeStationArrival/0/20/{encoded}"
         )
         payload = await self._get_json(url)
+        expected_line_id = self._subway_line_id(line_name) if line_name else None
         values = []
         for row in payload.get("realtimeArrivalList", []):
+            if not isinstance(row, dict):
+                continue
+            if expected_line_id and str(row.get("subwayId") or "") != expected_line_id:
+                continue
             try:
                 value = int(row.get("barvlDt"))
-            except (AttributeError, TypeError, ValueError):
+            except (TypeError, ValueError):
                 continue
             if value >= 0:
-                values.append(value)
-        return min(values) if values else None
+                values.append(
+                    SeoulSubwayArrival(
+                        arrival_sec=value,
+                        train_id=str(row.get("btrainNo") or "") or None,
+                        direction=str(row.get("trainLineNm") or "") or None,
+                        terminal_station=str(row.get("bstatnNm") or "") or None,
+                    )
+                )
+        return sorted(values, key=lambda arrival: arrival.arrival_sec)
 
     async def _get_json(self, url: str) -> dict[str, Any]:
         try:
@@ -107,6 +133,32 @@ class SeoulDataClient:
     @staticmethod
     def _station_key(value: str) -> str:
         return value.strip().removesuffix("역").replace(" ", "")
+
+    @staticmethod
+    def _subway_line_id(value: str) -> str | None:
+        normalized = value.replace("수도권", "").replace(" ", "").removesuffix("호선")
+        aliases = {
+            "1": "1001",
+            "2": "1002",
+            "3": "1003",
+            "4": "1004",
+            "5": "1005",
+            "6": "1006",
+            "7": "1007",
+            "8": "1008",
+            "9": "1009",
+            "중앙선": "1061",
+            "경의중앙선": "1063",
+            "공항철도": "1065",
+            "경춘선": "1067",
+            "수인분당선": "1075",
+            "신분당선": "1077",
+            "경강선": "1081",
+            "우이신설선": "1092",
+            "서해선": "1093",
+            "GTX-A": "1032",
+        }
+        return aliases.get(normalized)
 
     @staticmethod
     def _unavailable() -> ApiError:

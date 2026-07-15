@@ -64,10 +64,19 @@ class WalkAccessibility:
 
 
 @dataclass(frozen=True)
+class RealtimeDeparture:
+    departure_at: datetime
+    low_floor_status: LowFloorStatus = LowFloorStatus.UNKNOWN
+    vehicle_id: str | None = None
+    direction: str | None = None
+
+
+@dataclass(frozen=True)
 class BusAccessibility:
     low_floor_status: LowFloorStatus = LowFloorStatus.UNKNOWN
     confidence: DataConfidence = DataConfidence.UNKNOWN
     source: DataSource = DataSource.UNKNOWN
+    departures: tuple[RealtimeDeparture, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -77,6 +86,7 @@ class StationAccessibility:
     location_description: str | None = None
     observed_at: datetime | None = None
     source: DataSource = DataSource.UNKNOWN
+    departures: tuple[RealtimeDeparture, ...] = ()
 
 
 @dataclass(frozen=True)

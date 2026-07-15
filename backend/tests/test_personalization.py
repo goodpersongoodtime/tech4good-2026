@@ -6,11 +6,22 @@ from app.domain import (
     BusAccessibility,
     ProviderLeg,
     ProviderRoute,
+    RealtimeDeparture,
     StationAccessibility,
     WalkAccessibility,
 )
 from app.main import demo_profile
-from app.models import Coordinate, DataConfidence, LegMode, LowFloorStatus, PlaceInput, RouteMode
+from app.models import (
+    Coordinate,
+    DataConfidence,
+    DataSource,
+    FacilityStatus,
+    LegMode,
+    LowFloorStatus,
+    PlaceInput,
+    RouteMode,
+    TimeSource,
+)
 from app.personalization import BaselinePersonalizationEngine
 
 SEOUL = ZoneInfo("Asia/Seoul")
@@ -117,6 +128,87 @@ def test_marks_explicitly_inaccessible_transit_route_unavailable() -> None:
     assert route.unavailable_reasons[0].code == "LOW_FLOOR_BUS_REQUIRED"
 
 
+def test_selects_catchable_low_floor_bus_and_includes_realtime_wait_in_eta() -> None:
+    origin = place("출발지", 37.56, 127.00)
+    boarding = place("동대문역사문화공원역8번출구", 37.565033, 127.007283)
+    destination = place("잠실역", 37.5133, 127.1002)
+    candidate = ProviderRoute(
+        provider_route_id="realtime-bus",
+        mode=RouteMode.TRANSIT,
+        title="301번",
+        standard_duration_sec=780,
+        total_distance_m=5240,
+        walk_distance_m=240,
+        transfer_count=0,
+        fare_krw=1500,
+        legs=[
+            ProviderLeg(
+                provider_leg_id="walk-to-bus",
+                mode=LegMode.WALK,
+                start=origin,
+                end=boarding,
+                distance_m=240,
+                duration_sec=180,
+                geometry=line(origin, boarding),
+            ),
+            ProviderLeg(
+                provider_leg_id="bus-301",
+                mode=LegMode.BUS,
+                start=boarding,
+                end=destination,
+                distance_m=5000,
+                duration_sec=600,
+                geometry=line(boarding, destination),
+                route_id="tmap-301",
+                route_name="간선:301",
+                departure_at=datetime(2026, 7, 15, 14, 3, tzinfo=SEOUL),
+                arrival_at=datetime(2026, 7, 15, 14, 13, tzinfo=SEOUL),
+                time_source=TimeSource.SCHEDULED,
+            ),
+        ],
+    )
+    context = AccessibilityContext(
+        walk={
+            "walk-to-bus": WalkAccessibility(
+                has_stairs=False,
+                max_slope_percent=2,
+                confidence=DataConfidence.VERIFIED,
+            )
+        },
+        bus={
+            "bus-301": BusAccessibility(
+                low_floor_status=LowFloorStatus.CONFIRMED,
+                confidence=DataConfidence.VERIFIED,
+                source=DataSource.SEOUL_OPEN_DATA,
+                departures=(
+                    RealtimeDeparture(
+                        departure_at=datetime(2026, 7, 15, 14, 2, tzinfo=SEOUL),
+                        low_floor_status=LowFloorStatus.NOT_LOW_FLOOR,
+                        vehicle_id="normal-bus",
+                    ),
+                    RealtimeDeparture(
+                        departure_at=datetime(2026, 7, 15, 14, 8, tzinfo=SEOUL),
+                        low_floor_status=LowFloorStatus.CONFIRMED,
+                        vehicle_id="low-floor-bus",
+                    ),
+                ),
+            )
+        },
+    )
+
+    [route] = BaselinePersonalizationEngine().personalize_routes(
+        [candidate], demo_profile(), context, NOW
+    )
+
+    bus_leg = route.legs[1]
+    assert bus_leg.low_floor_status == LowFloorStatus.CONFIRMED
+    assert bus_leg.departure_at == datetime(2026, 7, 15, 14, 8, tzinfo=SEOUL)
+    assert bus_leg.arrival_at == datetime(2026, 7, 15, 14, 18, tzinfo=SEOUL)
+    assert bus_leg.time_source == TimeSource.REALTIME
+    assert route.summary.personalized_duration_sec == 1080
+    assert route.summary.arrival_at == datetime(2026, 7, 15, 14, 18, tzinfo=SEOUL)
+
+
 def test_personalized_walk_time_never_becomes_shorter_than_provider_time() -> None:
     origin = place("출발", 37.5, 127.0)
     destination = place("도착", 37.51, 127.01)
@@ -202,6 +294,83 @@ def test_unknown_elevator_data_is_caution_not_false_unavailable() -> None:
 
     assert route.accessibility_status == "CAUTION"
     assert route.warnings[0].code == "ELEVATOR_STATUS_UNKNOWN"
+
+
+def test_realtime_subway_skips_train_without_accessible_boarding_buffer() -> None:
+    origin = place("출발지", 37.55, 126.97)
+    boarding = place("서울역", 37.5547, 126.9707)
+    destination = place("사당역", 37.4768, 126.9816)
+    candidate = ProviderRoute(
+        provider_route_id="realtime-subway",
+        mode=RouteMode.TRANSIT,
+        title="4호선",
+        standard_duration_sec=700,
+        total_distance_m=5100,
+        walk_distance_m=100,
+        transfer_count=0,
+        fare_krw=1500,
+        legs=[
+            ProviderLeg(
+                provider_leg_id="walk-to-subway",
+                mode=LegMode.WALK,
+                start=origin,
+                end=boarding,
+                distance_m=100,
+                duration_sec=100,
+                geometry=line(origin, boarding),
+            ),
+            ProviderLeg(
+                provider_leg_id="subway-4",
+                mode=LegMode.SUBWAY,
+                start=boarding,
+                end=destination,
+                distance_m=5000,
+                duration_sec=600,
+                geometry=line(boarding, destination),
+                line_id="tmap-line-4",
+                line_name="수도권4호선",
+                departure_at=datetime(2026, 7, 15, 14, 2, tzinfo=SEOUL),
+                arrival_at=datetime(2026, 7, 15, 14, 12, tzinfo=SEOUL),
+                time_source=TimeSource.SCHEDULED,
+            ),
+        ],
+    )
+    context = AccessibilityContext(
+        walk={
+            "walk-to-subway": WalkAccessibility(
+                has_stairs=False,
+                max_slope_percent=2,
+                confidence=DataConfidence.VERIFIED,
+            )
+        },
+        subway={
+            "subway-4": StationAccessibility(
+                elevator_status=FacilityStatus.AVAILABLE,
+                confidence=DataConfidence.VERIFIED,
+                source=DataSource.SEOUL_OPEN_DATA,
+                departures=(
+                    RealtimeDeparture(
+                        departure_at=datetime(2026, 7, 15, 14, 2, 30, tzinfo=SEOUL),
+                        direction="오이도행",
+                    ),
+                    RealtimeDeparture(
+                        departure_at=datetime(2026, 7, 15, 14, 4, tzinfo=SEOUL),
+                        direction="오이도행",
+                    ),
+                ),
+            )
+        },
+    )
+
+    [route] = BaselinePersonalizationEngine().personalize_routes(
+        [candidate], demo_profile(), context, NOW
+    )
+
+    subway_leg = route.legs[1]
+    assert subway_leg.departure_at == datetime(2026, 7, 15, 14, 4, tzinfo=SEOUL)
+    assert subway_leg.arrival_at == datetime(2026, 7, 15, 14, 14, tzinfo=SEOUL)
+    assert subway_leg.time_source == TimeSource.REALTIME
+    assert route.summary.personalized_duration_sec == 840
 
 
 def test_sorts_accessible_before_caution_before_unavailable() -> None:

@@ -51,7 +51,8 @@ def personalize_routes(
 
 후보 경로에서 참조하는 접근성 데이터의 매핑입니다.
 
-- `busAccessibilityByRouteAndStop`: 저상버스 `CONFIRMED | EXPECTED | NOT_LOW_FLOOR | UNKNOWN`
+- `busAccessibilityByRouteAndStop`: 저상버스 `CONFIRMED | EXPECTED | NOT_LOW_FLOOR | UNKNOWN`과 실시간 차량별 출발 후보
+- `subwayAccessibilityByStation`: 승하차역 엘리베이터 상태와 호선별 실시간 출발 후보
 - `stationFacilities`: 역별 엘리베이터·휠체어리프트 상태와 위치
 - `walkingSegments`: 보행 구간별 계단 여부, 최대 경사, 통행 가능 상태
 - 각 값은 `dataConfidence: VERIFIED | ESTIMATED | UNKNOWN`, `observedAt`, `source`를 가집니다.
@@ -115,6 +116,7 @@ def personalize_routes(
 2. 계단 회피 사용자의 계단 포함 경로는 `UNAVAILABLE`입니다.
 3. 엘리베이터 필수 사용자의 시설 상태가 `UNKNOWN`이면 `CAUTION`입니다.
 4. 저상버스 필수 사용자의 일반버스는 `UNAVAILABLE`입니다.
+5. 개인화된 승차 지점 도착시각에서 60초 이상 여유가 있는 실시간 차량만 선택하고, 대기시간을 최종 ETA에 포함합니다.
 5. 접근성 상태가 같으면 개인화 시간이 빠른 경로가 먼저입니다.
 6. 놓친 편 이후 다음 편이 있으면 새 대기시간과 ETA가 반영됩니다.
 7. 모든 필수 경로가 불가능하면 빈 경로와 택시 대안을 만들 수 있는 결과를 반환합니다.

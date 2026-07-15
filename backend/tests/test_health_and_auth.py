@@ -3,7 +3,8 @@ from fastapi.testclient import TestClient
 from pydantic import ValidationError
 
 from app.config import Settings
-from app.main import create_app
+from app.main import build_container, create_app
+from app.providers.seoul_bus import SeoulBusClient
 
 
 def make_client() -> TestClient:
@@ -76,3 +77,20 @@ def test_tmap_mode_requires_separate_subway_key() -> None:
             seoul_api_key="seoul-general-key",
             seoul_subway_api_key="",
         )
+
+
+@pytest.mark.asyncio
+async def test_tmap_mode_wires_optional_realtime_bus_client() -> None:
+    settings = Settings(
+        route_provider="tmap",
+        tmap_app_key="tmap-key",
+        seoul_api_key="seoul-general-key",
+        seoul_subway_api_key="seoul-subway-key",
+        seoul_bus_api_key="decoded-data-go-kr-key",
+    )
+
+    container = build_container(settings)
+    try:
+        assert isinstance(container.route_service.accessibility.bus, SeoulBusClient)
+    finally:
+        await container.close()

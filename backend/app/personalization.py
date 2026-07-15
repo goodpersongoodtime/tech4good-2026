@@ -53,6 +53,7 @@ class BaselinePersonalizationEngine:
     """Deterministic baseline that can be replaced behind PersonalizationEngine."""
 
     steep_slope_threshold_percent = 6.0
+    accessible_boarding_buffer_sec = 60
 
     def personalize_routes(
         self,
@@ -81,6 +82,7 @@ class BaselinePersonalizationEngine:
         unavailable: list[Notice] = []
         confidences: list[DataConfidence] = []
         legs = []
+        cursor = requested_at
 
         for provider_leg in candidate.legs:
             if provider_leg.mode == LegMode.WALK:
@@ -89,11 +91,11 @@ class BaselinePersonalizationEngine:
                 )
             elif provider_leg.mode == LegMode.BUS:
                 leg, leg_warnings, leg_unavailable, confidence = self._bus_leg(
-                    provider_leg, profile, context, requested_at
+                    provider_leg, profile, context, cursor
                 )
             elif provider_leg.mode == LegMode.SUBWAY:
                 leg, leg_warnings, leg_unavailable, confidence = self._subway_leg(
-                    provider_leg, profile, context, requested_at
+                    provider_leg, profile, context, cursor
                 )
             else:
                 leg, leg_warnings, leg_unavailable, confidence = self._taxi_leg(
@@ -103,10 +105,21 @@ class BaselinePersonalizationEngine:
             warnings.extend(leg_warnings)
             unavailable.extend(leg_unavailable)
             confidences.append(confidence)
+            if leg.mode in {LegMode.BUS, LegMode.SUBWAY}:
+                cursor = max(cursor, leg.arrival_at)
+            else:
+                cursor += timedelta(seconds=leg.personalized_duration_sec)
 
         summed_standard = sum(leg.standard_duration_sec for leg in legs)
         non_leg_time = max(0, candidate.standard_duration_sec - summed_standard)
-        personalized_duration = non_leg_time + sum(leg.personalized_duration_sec for leg in legs)
+        duration_from_legs = non_leg_time + sum(
+            leg.personalized_duration_sec for leg in legs
+        )
+        duration_from_timeline = max(
+            0,
+            ceil((cursor - requested_at).total_seconds()),
+        )
+        personalized_duration = max(duration_from_legs, duration_from_timeline)
         if personalized_duration > candidate.standard_duration_sec:
             extra_minutes = ceil((personalized_duration - candidate.standard_duration_sec) / 60)
             warnings.insert(
@@ -214,10 +227,40 @@ class BaselinePersonalizationEngine:
         leg: ProviderLeg,
         profile: UserProfile,
         context: AccessibilityContext,
-        requested_at: datetime,
+        earliest_boarding_at: datetime,
     ):
         value = context.bus.get(leg.provider_leg_id)
-        low_floor = value.low_floor_status if value else LowFloorStatus.UNKNOWN
+        selected_departure = None
+        if value and value.departures:
+            catchable_at = earliest_boarding_at + timedelta(
+                seconds=self.accessible_boarding_buffer_sec
+            )
+            catchable = sorted(
+                (
+                    departure
+                    for departure in value.departures
+                    if departure.departure_at >= catchable_at
+                ),
+                key=lambda departure: departure.departure_at,
+            )
+            if profile.preferences.low_floor_bus_required:
+                accessible = [
+                    departure
+                    for departure in catchable
+                    if departure.low_floor_status == LowFloorStatus.CONFIRMED
+                ]
+                selected_departure = accessible[0] if accessible else (
+                    catchable[0] if catchable else None
+                )
+            else:
+                selected_departure = catchable[0] if catchable else None
+        low_floor = (
+            selected_departure.low_floor_status
+            if selected_departure is not None
+            else value.low_floor_status
+            if value and not value.departures
+            else LowFloorStatus.UNKNOWN
+        )
         confidence = value.confidence if value else DataConfidence.UNKNOWN
         warnings: list[Notice] = []
         unavailable: list[Notice] = []
@@ -226,8 +269,13 @@ class BaselinePersonalizationEngine:
                 unavailable.append(self._notice("LOW_FLOOR_BUS_REQUIRED", "저상버스가 아닌 차량입니다.", leg, critical=True))
             elif low_floor != LowFloorStatus.CONFIRMED:
                 warnings.append(self._notice("LOW_FLOOR_STATUS_UNKNOWN", "저상버스 운행 여부를 확인해 주세요.", leg))
-        departure = leg.departure_at or requested_at
-        arrival = leg.arrival_at or departure + timedelta(seconds=leg.duration_sec)
+        if selected_departure is not None:
+            departure = selected_departure.departure_at
+            time_source = TimeSource.REALTIME
+        else:
+            departure = max(leg.departure_at or earliest_boarding_at, earliest_boarding_at)
+            time_source = leg.time_source
+        arrival = departure + timedelta(seconds=leg.duration_sec)
         return (
             BusLeg(
                 leg_id=leg.provider_leg_id,
@@ -244,7 +292,7 @@ class BaselinePersonalizationEngine:
                 low_floor_status=low_floor,
                 departure_at=departure,
                 arrival_at=arrival,
-                time_source=leg.time_source,
+                time_source=time_source,
                 data_confidence=confidence,
                 data_source=value.source if value else DataSource.UNKNOWN,
             ),
@@ -258,7 +306,7 @@ class BaselinePersonalizationEngine:
         leg: ProviderLeg,
         profile: UserProfile,
         context: AccessibilityContext,
-        requested_at: datetime,
+        earliest_boarding_at: datetime,
     ):
         value = context.subway.get(leg.provider_leg_id)
         elevator = value.elevator_status if value and value.elevator_status else FacilityStatus.UNKNOWN
@@ -270,8 +318,25 @@ class BaselinePersonalizationEngine:
                 unavailable.append(self._notice("ELEVATOR_REQUIRED", "이용 가능한 엘리베이터가 없습니다.", leg, critical=True))
             elif elevator == FacilityStatus.UNKNOWN:
                 warnings.append(self._notice("ELEVATOR_STATUS_UNKNOWN", "엘리베이터 상태가 확인되지 않았습니다.", leg))
-        departure = leg.departure_at or requested_at
-        arrival = leg.arrival_at or departure + timedelta(seconds=leg.duration_sec)
+        catchable_at = earliest_boarding_at + timedelta(
+            seconds=self.accessible_boarding_buffer_sec
+        )
+        departures = sorted(
+            (
+                departure
+                for departure in value.departures
+                if departure.departure_at >= catchable_at
+            ),
+            key=lambda departure: departure.departure_at,
+        ) if value else []
+        selected_departure = departures[0] if departures else None
+        if selected_departure is not None:
+            departure = selected_departure.departure_at
+            time_source = TimeSource.REALTIME
+        else:
+            departure = max(leg.departure_at or earliest_boarding_at, earliest_boarding_at)
+            time_source = leg.time_source
+        arrival = departure + timedelta(seconds=leg.duration_sec)
         facility = StationFacility(
             type="ELEVATOR",
             status=elevator,
@@ -296,7 +361,7 @@ class BaselinePersonalizationEngine:
                 alighting_station=leg.end,
                 departure_at=departure,
                 arrival_at=arrival,
-                time_source=leg.time_source,
+                time_source=time_source,
                 facilities=[facility],
                 data_confidence=confidence,
             ),

@@ -102,3 +102,60 @@ async def test_realtime_subway_returns_soonest_nonnegative_arrival() -> None:
 
     assert seconds == 45
     assert "/seoul-subway-key/json/" in str(upstream.calls.last.request.url)
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_realtime_subway_arrivals_are_filtered_to_tmap_line() -> None:
+    respx.get(url__regex=r"http://swopenapi\.seoul\.go\.kr/.*").mock(
+        return_value=httpx.Response(
+            200,
+            json={
+                "errorMessage": {
+                    "status": 200,
+                    "code": "INFO-000",
+                    "message": "정상 처리되었습니다.",
+                    "total": 3,
+                },
+                "realtimeArrivalList": [
+                    {
+                        "subwayId": "1001",
+                        "subwayNm": "1호선",
+                        "statnNm": "서울",
+                        "trainLineNm": "동묘앞행 - 상행",
+                        "barvlDt": "20",
+                        "btrainNo": "K101",
+                        "bstatnNm": "동묘앞",
+                    },
+                    {
+                        "subwayId": "1004",
+                        "subwayNm": "4호선",
+                        "statnNm": "서울",
+                        "trainLineNm": "진접행 - 상행",
+                        "barvlDt": "45",
+                        "btrainNo": "K401",
+                        "bstatnNm": "진접",
+                    },
+                    {
+                        "subwayId": "1004",
+                        "subwayNm": "4호선",
+                        "statnNm": "서울",
+                        "trainLineNm": "오이도행 - 하행",
+                        "barvlDt": "180",
+                        "btrainNo": "K402",
+                        "bstatnNm": "오이도",
+                    },
+                ],
+            },
+        )
+    )
+    async with httpx.AsyncClient() as client:
+        arrivals = await SeoulDataClient(
+            "seoul-general-key",
+            "seoul-subway-key",
+            client,
+        ).get_subway_arrivals("서울역", "수도권4호선")
+
+    assert [arrival.arrival_sec for arrival in arrivals] == [45, 180]
+    assert arrivals[0].train_id == "K401"
+    assert arrivals[0].terminal_station == "진접"

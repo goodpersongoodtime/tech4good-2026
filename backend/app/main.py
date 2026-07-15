@@ -31,6 +31,7 @@ from app.personalization import BaselinePersonalizationEngine
 from app.providers.accessibility import HybridAccessibilityProvider
 from app.providers.mock import MockRouteProvider
 from app.providers.seoul import SeoulDataClient
+from app.providers.seoul_bus import SeoulBusClient
 from app.providers.tmap import TmapRouteProvider
 from app.services import RouteService, StoredRoute
 from app.storage import MemoryTTLStore
@@ -83,12 +84,22 @@ def build_container(settings: Settings) -> ApplicationContainer:
             if settings.seoul_api_key and settings.seoul_subway_api_key
             else None
         )
+        bus = (
+            SeoulBusClient(settings.seoul_bus_api_key, client)
+            if settings.seoul_bus_api_key
+            else None
+        )
     else:
         route_provider = MockRouteProvider()
         seoul = None
+        bus = None
     service = RouteService(
         provider=route_provider,
-        accessibility=HybridAccessibilityProvider(seoul),
+        accessibility=HybridAccessibilityProvider(
+            seoul=seoul,
+            bus=bus,
+            use_synthetic_bus=settings.route_provider == "mock",
+        ),
         engine=BaselinePersonalizationEngine(),
         store=MemoryTTLStore[StoredRoute](),
         ttl_sec=settings.route_ttl_sec,
