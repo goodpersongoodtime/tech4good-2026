@@ -170,6 +170,24 @@ async def test_transit_no_route_result_yields_no_candidates() -> None:
 
 @pytest.mark.asyncio
 @respx.mock
+async def test_transit_unknown_result_status_remains_an_invalid_response() -> None:
+    respx.post("https://apis.openapi.sk.com/transit/routes").mock(
+        return_value=httpx.Response(
+            200,
+            json={"result": {"status": 99, "message": "알 수 없는 공급자 오류"}},
+        )
+    )
+    async with httpx.AsyncClient() as client:
+        provider = TmapRouteProvider("secret", client)
+        with pytest.raises(ApiError) as caught:
+            await provider.search(search_request(RouteMode.TRANSIT))
+
+    assert caught.value.status_code == 502
+    assert caught.value.code == "UPSTREAM_INVALID_RESPONSE"
+
+
+@pytest.mark.asyncio
+@respx.mock
 async def test_tmap_timeout_is_exposed_without_mock_fallback() -> None:
     respx.post("https://apis.openapi.sk.com/transit/routes").mock(
         side_effect=httpx.ReadTimeout("slow upstream")

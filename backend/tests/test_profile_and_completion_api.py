@@ -146,11 +146,12 @@ def test_navigation_complete_is_idempotency_guarded_and_keeps_speed_without_samp
 
     assert positioned.status_code == 200
     assert completed.status_code == 200
-    assert completed.json() == {
+    completed_body = completed.json()
+    assert datetime.fromisoformat(completed_body.pop("completedAt")) == completed_at
+    assert completed_body == {
         "sessionId": session_id,
         "status": "COMPLETED",
         "routeRevision": 1,
-        "completedAt": completed_at.isoformat(),
         "walkingSpeedUpdated": False,
         "walkingSpeed": profile_before["walkingSpeed"],
     }

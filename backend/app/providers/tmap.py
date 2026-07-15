@@ -139,7 +139,12 @@ class TmapRouteProvider:
     def _parse_transit(
         self, payload: dict[str, Any], request: RouteSearchRequest
     ) -> list[ProviderRoute]:
-        if "metaData" not in payload and "result" in payload:
+        result = payload.get("result")
+        if (
+            "metaData" not in payload
+            and isinstance(result, dict)
+            and result.get("status") == 11
+        ):
             # TMAP은 제공할 대중교통 경로가 없으면 HTTP 200과 함께 `result` 상태
             # 객체(예: status 11 "출발지와 도착지가 너무 가까움")를 내려줍니다. 정상
             # 경로 구조가 아니므로 빈 후보로 처리해 502 대신 NO_ACCESSIBLE_ROUTE와
