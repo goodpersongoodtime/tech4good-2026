@@ -18,6 +18,7 @@ class Settings(BaseSettings):
     cors_origins: list[str] = Field(default_factory=lambda: ["http://localhost:5173"])
     tmap_app_key: str | None = None
     seoul_api_key: str | None = None
+    seoul_subway_api_key: str | None = None
     route_ttl_sec: int = 600
     navigation_ttl_sec: int = 7200
     upstream_timeout_sec: float = 5.0
@@ -28,6 +29,10 @@ class Settings(BaseSettings):
             raise ValueError("TMAP_APP_KEY is required when ROUTE_PROVIDER=tmap")
         if self.route_provider == "tmap" and not self.seoul_api_key:
             raise ValueError("SEOUL_API_KEY is required when ROUTE_PROVIDER=tmap")
+        if self.route_provider == "tmap" and not self.seoul_subway_api_key:
+            raise ValueError(
+                "SEOUL_SUBWAY_API_KEY is required when ROUTE_PROVIDER=tmap"
+            )
         return self
 
 

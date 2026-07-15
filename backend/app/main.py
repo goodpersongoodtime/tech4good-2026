@@ -75,8 +75,12 @@ def build_container(settings: Settings) -> ApplicationContainer:
         client = httpx.AsyncClient(timeout=settings.upstream_timeout_sec)
         route_provider = TmapRouteProvider(settings.tmap_app_key or "", client)
         seoul = (
-            SeoulDataClient(settings.seoul_api_key, client)
-            if settings.seoul_api_key
+            SeoulDataClient(
+                settings.seoul_api_key,
+                settings.seoul_subway_api_key,
+                client,
+            )
+            if settings.seoul_api_key and settings.seoul_subway_api_key
             else None
         )
     else:

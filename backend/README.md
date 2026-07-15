@@ -19,7 +19,7 @@ uv run uvicorn app.main:app --reload
 ## 공급자 모드
 
 - `ROUTE_PROVIDER=mock`: 외부 키 없이 세 경로 모드와 안내 흐름을 합성 데이터로 실행합니다.
-- `ROUTE_PROVIDER=tmap`: TMAP 대중교통·자동차·보행 API와 서울시 데이터를 호출합니다. `TMAP_APP_KEY`, `SEOUL_API_KEY`가 모두 필요하며 장애 시 Mock으로 자동 전환하지 않습니다.
+- `ROUTE_PROVIDER=tmap`: TMAP 대중교통·자동차·보행 API와 서울시 데이터를 호출합니다. `TMAP_APP_KEY`, 서울 일반 데이터용 `SEOUL_API_KEY`, 실시간 지하철용 `SEOUL_SUBWAY_API_KEY`가 필요하며 장애 시 Mock으로 자동 전환하지 않습니다.
 - 접근성 어댑터의 저상버스·경사·단차는 현재 `SYNTHETIC_FIXTURE`, 지하철 엘리베이터는 TMAP 모드에서 `SEOUL_OPEN_DATA`로 표시됩니다.
 
 ## 테스트

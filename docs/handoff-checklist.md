@@ -38,13 +38,14 @@ DEMO_TOKEN=demo-token
 CORS_ORIGINS=["http://localhost:5173"]
 TMAP_APP_KEY=...
 SEOUL_API_KEY=...
+SEOUL_SUBWAY_API_KEY=...
 ```
 
 - [ ] 실제 키가 Git에 포함되지 않았습니다.
 - [ ] 카카오 웹 도메인에 localhost와 배포 도메인을 등록했습니다.
 - [ ] TMAP 호출은 백엔드에서만 이루어집니다.
 - [ ] FastAPI CORS는 `CORS_ORIGINS`에 등록한 프론트 주소만 허용합니다.
-- [ ] `ROUTE_PROVIDER=tmap`에서는 두 외부 키가 모두 등록되어 있습니다.
+- [ ] `ROUTE_PROVIDER=tmap`에서는 TMAP·서울 일반·서울 실시간 지하철 키가 모두 등록되어 있습니다.
 
 ## 4. 데이터 출처와 화면 표시
 

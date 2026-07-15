@@ -31,7 +31,7 @@ async def test_elevator_presence_is_normalized_as_available() -> None:
         )
     )
     async with httpx.AsyncClient() as client:
-        seoul = SeoulDataClient("seoul-key", client)
+        seoul = SeoulDataClient("seoul-general-key", "seoul-subway-key", client)
         facility = await seoul.get_elevator("서울역")
         second = await seoul.get_elevator("시청역")
 
@@ -45,7 +45,7 @@ async def test_elevator_presence_is_normalized_as_available() -> None:
 @pytest.mark.asyncio
 @respx.mock
 async def test_realtime_subway_returns_soonest_nonnegative_arrival() -> None:
-    respx.get(url__regex=r"http://swopenapi\.seoul\.go\.kr/.*").mock(
+    upstream = respx.get(url__regex=r"http://swopenapi\.seoul\.go\.kr/.*").mock(
         return_value=httpx.Response(
             200,
             json={
@@ -57,6 +57,11 @@ async def test_realtime_subway_returns_soonest_nonnegative_arrival() -> None:
         )
     )
     async with httpx.AsyncClient() as client:
-        seconds = await SeoulDataClient("seoul-key", client).get_next_arrival_sec("시청")
+        seconds = await SeoulDataClient(
+            "seoul-general-key",
+            "seoul-subway-key",
+            client,
+        ).get_next_arrival_sec("시청")
 
     assert seconds == 45
+    assert "/seoul-subway-key/json/" in str(upstream.calls.last.request.url)

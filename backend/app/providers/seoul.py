@@ -23,10 +23,12 @@ class SeoulDataClient:
     def __init__(
         self,
         api_key: str,
+        subway_api_key: str,
         client: httpx.AsyncClient,
         elevator_cache_ttl_sec: int = 600,
     ) -> None:
         self.api_key = api_key
+        self.subway_api_key = subway_api_key
         self.client = client
         self.elevator_cache_ttl_sec = elevator_cache_ttl_sec
         self._elevator_rows: list[dict[str, Any]] | None = None
@@ -61,7 +63,7 @@ class SeoulDataClient:
     async def get_next_arrival_sec(self, station_name: str) -> int | None:
         encoded = quote(self._station_key(station_name), safe="")
         url = (
-            f"{self.subway_base_url}/{self.api_key}/json/"
+            f"{self.subway_base_url}/{self.subway_api_key}/json/"
             f"realtimeStationArrival/0/20/{encoded}"
         )
         payload = await self._get_json(url)
