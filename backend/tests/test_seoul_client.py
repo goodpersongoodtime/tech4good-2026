@@ -44,6 +44,43 @@ async def test_elevator_presence_is_normalized_as_available() -> None:
 
 @pytest.mark.asyncio
 @respx.mock
+async def test_elevator_supports_current_seoul_response_envelope() -> None:
+    respx.get(url__regex=r"http://openapi\.seoul\.go\.kr:8088/.*").mock(
+        return_value=httpx.Response(
+            200,
+            json={
+                "response": {
+                    "header": {"resultCode": "00", "resultMsg": "NORMAL_CODE"},
+                    "body": {
+                        "items": {
+                            "item": [
+                                {
+                                    "stnNm": "서울역",
+                                    "dtlPstn": "1번 출구 방면",
+                                    "oprtngSitu": "운영중",
+                                }
+                            ]
+                        },
+                        "totalCount": 1,
+                    },
+                }
+            },
+        )
+    )
+    async with httpx.AsyncClient() as client:
+        facility = await SeoulDataClient(
+            "seoul-general-key",
+            "seoul-subway-key",
+            client,
+        ).get_elevator("서울역")
+
+    assert facility is not None
+    assert facility.status == FacilityStatus.AVAILABLE
+    assert facility.location_description == "1번 출구 방면"
+
+
+@pytest.mark.asyncio
+@respx.mock
 async def test_realtime_subway_returns_soonest_nonnegative_arrival() -> None:
     upstream = respx.get(url__regex=r"http://swopenapi\.seoul\.go\.kr/.*").mock(
         return_value=httpx.Response(

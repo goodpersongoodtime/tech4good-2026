@@ -42,7 +42,12 @@ class SeoulDataClient:
                 continue
             actual = self._station_key(str(row.get("stnNm") or row.get("STN_NM") or ""))
             if actual == expected:
-                location = row.get("dtlLoc") or row.get("DTL_LOC") or row.get("fcltLoc")
+                location = (
+                    row.get("dtlLoc")
+                    or row.get("DTL_LOC")
+                    or row.get("fcltLoc")
+                    or row.get("dtlPstn")
+                )
                 return SeoulElevator(
                     status=FacilityStatus.AVAILABLE,
                     location_description=str(location) if location else None,
@@ -55,7 +60,14 @@ class SeoulDataClient:
             return self._elevator_rows
         url = f"{self.elevator_base_url}/{self.api_key}/json/getFcElvtr/1/1000"
         payload = await self._get_json(url)
-        raw_rows = (payload.get("getFcElvtr") or {}).get("row", [])
+        legacy_rows = (payload.get("getFcElvtr") or {}).get("row", [])
+        current_items = (
+            ((payload.get("response") or {}).get("body") or {}).get("items") or {}
+        )
+        current_rows = (
+            current_items.get("item", []) if isinstance(current_items, dict) else []
+        )
+        raw_rows = legacy_rows or current_rows
         self._elevator_rows = [row for row in raw_rows if isinstance(row, dict)]
         self._elevator_rows_expires_at = now + self.elevator_cache_ttl_sec
         return self._elevator_rows

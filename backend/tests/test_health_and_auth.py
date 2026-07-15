@@ -60,7 +60,12 @@ def test_profile_returns_fixed_demo_profile() -> None:
 
 def test_tmap_mode_requires_both_tmap_and_seoul_keys() -> None:
     with pytest.raises(ValidationError, match="SEOUL_API_KEY"):
-        Settings(route_provider="tmap", tmap_app_key="tmap-key")
+        Settings(
+            route_provider="tmap",
+            tmap_app_key="tmap-key",
+            seoul_api_key="",
+            seoul_subway_api_key="seoul-subway-key",
+        )
 
 
 def test_tmap_mode_requires_separate_subway_key() -> None:
@@ -69,4 +74,5 @@ def test_tmap_mode_requires_separate_subway_key() -> None:
             route_provider="tmap",
             tmap_app_key="tmap-key",
             seoul_api_key="seoul-general-key",
+            seoul_subway_api_key="",
         )
