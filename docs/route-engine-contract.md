@@ -7,18 +7,20 @@
 ```python
 def personalize_routes(
     provider_routes: list[ProviderRoute],
-    profile: ProfileConstraints,
+    profile: UserProfile,
     context: AccessibilityContext,
     requested_at: datetime,
-) -> list[PersonalizedRoute]:
+) -> list[Route]:
     """접근성 상태와 개인화 ETA가 계산되고 정렬된 경로를 반환한다."""
 ```
 
 함수는 네트워크와 DB를 호출하지 않으며 동일 입력에 동일 출력을 반환해야 합니다.
 
+현재 구현 경계는 `backend/app/personalization.py`의 `PersonalizationEngine` 프로토콜입니다. 팀원 모듈은 이 프로토콜을 구현하고 `build_container()`의 엔진 주입만 교체합니다.
+
 ## 2. 입력 모델
 
-### `ProfileConstraints`
+### `UserProfile`
 
 | 필드 | 타입 | 설명 |
 |---|---|---|
